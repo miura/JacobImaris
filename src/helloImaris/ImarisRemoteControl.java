@@ -29,6 +29,8 @@ import java.util.Random;
 
 import javax.swing.JComboBox;
 import javax.swing.JLabel;
+import java.awt.Dimension;
+import java.awt.Rectangle;
 /**
  * @author Volker
  * 
@@ -91,6 +93,8 @@ public class ImarisRemoteControl extends JFrame {
 
 	private ActiveXComponent imarisApplication;
 
+	private JButton jButton = null;
+
 	/**
 	 * This is the default constructor
 	 */
@@ -108,8 +112,8 @@ public class ImarisRemoteControl extends JFrame {
 		this
 				.setDefaultCloseOperation(javax.swing.WindowConstants.DISPOSE_ON_CLOSE);
 		this.setContentPane(getJPanel());
-		this.setSize(440, 545);
-		this.setTitle("Hello Imaris DataSet");
+		this.setSize(440, 577);
+		this.setTitle("Imaris interface");
 		this.addWindowListener(new java.awt.event.WindowAdapter() {
 			public void windowClosing(java.awt.event.WindowEvent e) {
 				if (imarisApplication != null) {
@@ -119,6 +123,8 @@ public class ImarisRemoteControl extends JFrame {
 			}
 		});
 	}
+
+
 
 	/**
 	 * This method initializes jPanel
@@ -132,6 +138,7 @@ public class ImarisRemoteControl extends JFrame {
 			jPanel.add(getJPanel1(), null);
 			jPanel.add(getJPanel2(), null);
 			jPanel.add(getJPanel3(), null);
+			jPanel.add(getJButtonExport3Dstack(), null);
 		}
 		return jPanel;
 	}
@@ -579,6 +586,25 @@ public class ImarisRemoteControl extends JFrame {
 					});
 		}
 		return setRandomVoxelIntensitiesButton;
+	}
+
+	/**
+	 * This method initializes jButton	
+	 * 	
+	 * @return javax.swing.JButton	
+	 */
+	private JButton getJButtonExport3Dstack() {
+		if (jButton == null) {
+			jButton = new JButton();
+			jButton.setBounds(new Rectangle(33, 510, 363, 26));
+			jButton.setText("Export Current Stack to Imaris");
+			jButton.addActionListener(new java.awt.event.ActionListener() {
+				public void actionPerformed(java.awt.event.ActionEvent e) {
+					System.out.println("actionPerformed()"); // TODO Auto-generated Event stub actionPerformed()
+				}
+			});
+		}
+		return jButton;
 	}
 
 	public static void main(String[] args) {
