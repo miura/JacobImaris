@@ -719,31 +719,30 @@ public class ImarisRemoteControl extends JFrame {
 		return slice;
 	}
 	
-	//modified bpImaris_Adaptor2 for use with jacob-imaris by Volker. 
-	//implementation of export button acition
+	//modified bpImaris_Adaptor2 for use with JACOB-imaris by Volker. 
+	//implementation of export button action
 	public boolean ExportDataSetToImaris(int paramInt1, int paramInt2, boolean paramBoolean) {
 		if (imarisApplication != null) {
 			int i = paramInt1;
-	/* 1396 */         int j = paramInt2;
-	/*      */ 
-	/* 1398 */         boolean bool = paramBoolean;
-	/*      */ 
-	/* 1402 */         ImagePlus localImagePlus = IJ.getImage();
-	/* 1403 */         localImagePlus.lock();
-	/* 1404 */         if (localImagePlus == null) {
-	/* 1405 */           IJ.showMessage("Please select an ImageJ image before exporting.");
-	/* 1406 */           return false; 
-						} 
-						int k = localImagePlus.getBitDepth();
-	/* 1409 */         ImageStack localImageStack = localImagePlus.getStack();
-	/* 1410 */         int l = localImageStack.getWidth();
-	/* 1411 */         int i2 = localImageStack.getHeight();
-	/* 1412 */         int i4 = localImageStack.getSize();
-	/* 1413 */         int i6 = 1;
-	/* 1414 */         int i7 = 1;
-	/*      */ 
-	/* 1418 */         // IDataSet localIDataSet = null;
-						ActiveXComponent localIDataSet = null;
+			int j = paramInt2;
+ 
+			boolean bool = paramBoolean;
+			ImagePlus localImagePlus = IJ.getImage();
+			localImagePlus.lock();
+			if (localImagePlus == null) {
+				IJ.showMessage("Please select an ImageJ image before exporting.");
+				return false; 
+			} 
+			int k = localImagePlus.getBitDepth();
+			ImageStack localImageStack = localImagePlus.getStack();
+			int l = localImageStack.getWidth();
+			int i2 = localImageStack.getHeight();
+			int i4 = localImageStack.getSize();
+			int i6 = 1;
+			int i7 = 1;
+			
+			// IDataSet localIDataSet = null;
+			ActiveXComponent localIDataSet = null;
 	/*      */         Object localObject1;
 	/*      */         Object localObject2;
 	/*      */         Object localObject3;
@@ -753,62 +752,54 @@ public class ImarisRemoteControl extends JFrame {
 	/*      */         int i1;
 	/*      */         int i3;
 	/*      */         int i5;
-	/*      */         //try { localIDataSet = this.mImaris.getMDataSet();
-						try { localIDataSet = imarisApplication.getPropertyAsComponent("mDataSet");
-	/* 1421 */           ((Object) localIDataSet).setAutoDelete(false);
-
-	
-						//create new object in Imars
-	/* 1423 */           if ((localIDataSet == null) || (bool == true))
-	/*      */           {
-							Variant[] parameter = new Variant[6];
-							parameter[1] = new Variant(l);	//x
-							parameter[2] = new Variant(i2); //y
-							parameter[3] = new Variant(i4); //z
-							parameter[4] = new Variant(i6); //ch
-							parameter[5] = new Variant(i7); //t
-	/* 1425 */             if (k == 8)
-	/*      */             {
-							parameter[0] = new Variant(1);	//type 8bit
-							localIDataSet.invoke("Create", parameter);		
-	/* 1427 */              //localIDataSet.create(new tType_(1L), new UInt32(l), new UInt32(i2), new UInt32(i4), new UInt32(i6), new UInt32(i7));
-	/* 1428 */             } else if (k == 16)
-	/*      */             {
+			//try { localIDataSet = this.mImaris.getMDataSet();
+			try { localIDataSet = imarisApplication.getPropertyAsComponent("mDataSet");
+	/* 1421 */  //((Object) localIDataSet).setAutoDelete(false);
+			
+				//create new object in Imars
+	/* 1423 */	if ((localIDataSet == null) || (bool == true)) {
+					Variant[] parameter = new Variant[6];	//In JACOB, this contains dimentional info and will be passed with 'invoke'
+					parameter[1] = new Variant(l);	//x
+					parameter[2] = new Variant(i2); //y
+					parameter[3] = new Variant(i4); //z
+					parameter[4] = new Variant(i6); //ch
+					parameter[5] = new Variant(i7); //t
+	/* 1425 */		if (k == 8)	{	//8-bit image
+						parameter[0] = new Variant(1);	//type 8bit
+						localIDataSet.invoke("Create", parameter);		
+	/* 1427 */			//localIDataSet.create(new tType_(1L), new UInt32(l), new UInt32(i2), new UInt32(i4), new UInt32(i6), new UInt32(i7));
+	/* 1428 */		} else if (k == 16) {
 							parameter[0] = new Variant(2);	//type 16 bit
 							localIDataSet.invoke("Create", parameter);				
 	/* 1430 */              //localIDataSet.create(new tType_(2L), new UInt32(l), new UInt32(i2), new UInt32(i4), new UInt32(i6), new UInt32(i7));
-	/* 1431 */             } else if (k == 32)
-	/*      */             {
-							parameter[0] = new Variant(3);	//type 32 bit
-							localIDataSet.invoke("Create", parameter);						
-	/* 1433 */              //localIDataSet.create(new tType_(3L), new UInt32(l), new UInt32(i2), new UInt32(i4), new UInt32(i6), new UInt32(i7)); } else {
-	/* 1434 */               if (k == 24)
-	/*      */               {
-	/* 1437 */                 IJ.showMessage("Error", "Please use an image of type 8, 16 or float.");
-	/* 1438 */                 localImagePlus.unlock();
-	/* 1439 */                 localIDataSet.release();
-	/* 1440 */                 localIDataSet = null;
-	/* 1441 */                 return false;
-	/*      */               }
-	/* 1443 */               IJ.showMessage("Error", "Unknown image type");
-	/* 1444 */               localImagePlus.unlock();
-	/* 1445 */               localIDataSet.release();
-	/* 1446 */               localIDataSet = null;
-	/* 1447 */               return false;
-	/*      */             }
-	/*      */ 
-	/* 1451 */             i = 1;
-	/* 1452 */             j = 1;
-	/*      */           }
-	/*      */           else
-							//append objects to the current already in Imaris
-	/*      */           {
-	/* 1457 */             UInt32 localUInt32 = localIDataSet.getMSizeX();
-	/* 1458 */             localObject1 = localIDataSet.getMSizeY();
-	/* 1459 */             localObject2 = localIDataSet.getMSizeZ();
-	/* 1460 */             localObject3 = localIDataSet.getMSizeC();
-	/* 1461 */             localObject4 = localIDataSet.getMSizeT();
-	/* 1462 */             localObject5 = localIDataSet.getMType();
+	/* 1431 */		} else if (k == 32) {
+								parameter[0] = new Variant(3);	//type 32 bit
+								localIDataSet.invoke("Create", parameter);						
+	/* 1433 */              	//localIDataSet.create(new tType_(3L), new UInt32(l), new UInt32(i2), new UInt32(i4), new UInt32(i6), new UInt32(i7)); 
+					} else {
+	/* 1434 */				if (k == 24) {
+	/* 1437 */					IJ.showMessage("Error", "Please use an image of type 8, 16 or float.");
+	/* 1438 */					localImagePlus.unlock();
+	/* 1439 */					//localIDataSet.release(); //this method does not exist for ActiveX component
+	/* 1440 */					localIDataSet = null;
+	/* 1441 */					return false;
+	/*      */				}
+	/* 1443 */				IJ.showMessage("Error", "Unknown image type");
+	/* 1444 */				localImagePlus.unlock();
+	/* 1445 */				//localIDataSet.release();
+	/* 1446 */				localIDataSet = null;
+	/* 1447 */				return false;
+	/*      */		}
+	/* 1451 */		i = 1;
+	/* 1452 */		j = 1;
+				//append objects to the current already in Imaris
+	/*      */	} else { 
+	/* 1457 */		UInt32 localUInt32 = localIDataSet.getMSizeX();
+	/* 1458 */		localObject1 = localIDataSet.getMSizeY();
+	/* 1459 */		localObject2 = localIDataSet.getMSizeZ();
+	/* 1460 */		localObject3 = localIDataSet.getMSizeC();
+	/* 1461 */		localObject4 = localIDataSet.getMSizeT();
+	/* 1462 */		localObject5 = localIDataSet.getMType();
 	/*      */ 
 	/* 1465 */             if (((k == 8) && (((tType_)localObject5).getValue() != 1L)) || ((k == 16) && (((tType_)localObject5).getValue() != 2L)) || ((k == 32) && (((tType_)localObject5).getValue() != 3L)))
 	/*      */             {
