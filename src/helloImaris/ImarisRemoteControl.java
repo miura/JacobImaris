@@ -18,6 +18,8 @@ package helloImaris;
 import ij.IJ;
 import ij.ImagePlus;
 import ij.ImageStack;
+import ij.WindowManager;
+import ij.measure.Calibration;
 import ij.plugin.CanvasResizer;
 import ij.process.ByteProcessor;
 import ij.process.FloatProcessor;
@@ -626,7 +628,16 @@ public class ImarisRemoteControl extends JFrame {
 			jButton.setText("Export Current Stack to Imaris");
 			jButton.addActionListener(new java.awt.event.ActionListener() {
 				public void actionPerformed(java.awt.event.ActionEvent e) {
-					System.out.println("actionPerformed()"); // TODO Auto-generated Event stub actionPerformed()
+					//System.out.println("actionPerformed()"); 
+					ImagePlus imp = WindowManager.getCurrentImage();
+					if (imp.getNFrames()== 1){
+						ExportDataSetToImaris(imp.getNChannels(), 1, true);
+						ExportDataSetToImaris(imp.getNChannels(), 2, false);
+					}
+					else if (imp.getNFrames()> 1){}
+					else {}
+				
+											
 				}
 			});
 		}
@@ -738,9 +749,33 @@ public class ImarisRemoteControl extends JFrame {
 		}
 		return slice;
 	}
+	/**
+	 * @author Kota Miura
+	 * @param xSize
+	 * @param ySize
+	 * @param zSize
+	 * @param type
+	 * @return
+	 */
+	private SafeArray createEmptyVolumeFor(int xSize, int ySize, int zSize, int type) {
+		SafeArray volume;
+		int[] lowbounds = {0,0,0};
+		int[] upbounds = {xSize, ySize, zSize};
+		
+		volume = new SafeArray(Variant.VariantByte, lowbounds, upbounds);
+		if (type == 2) {
+			volume = new SafeArray(18, lowbounds, upbounds);
+		}
+		if (type == 3) {
+			volume = new SafeArray(Variant.VariantFloat, lowbounds, upbounds);
+		}
+		return volume;
+	}
 	
 	//modified bpImaris_Adaptor2 for use with JACOB-imaris by Volker. 
 	//implementation of export button action
+	//TODO Geometry (voxel size) should be controllable from ImageJ
+	//	--> for this, use set mExtendMinX, mExtendMaxX pair. 
 	public boolean ExportDataSetToImaris(int paramInt1, int paramInt2, boolean paramBoolean) {
 		if (imarisApplication != null) {
 			int ijCh = paramInt1;	//channel
@@ -826,15 +861,16 @@ public class ImarisRemoteControl extends JFrame {
 	/* 1462 */		//localObject5 = localIDataSet.getMType();
 					Variant[] resizepara = new Variant[10];
 					resizepara[0] = new Variant(0);
-					resizepara[1] = new Variant(localIDataSet.getProperty("mSizeX"));
+					//resizepara[1] = new Variant(localIDataSet.getProperty("mSizeX"));
+					resizepara[1] = localIDataSet.getProperty("mSizeX");					
 					resizepara[2] = new Variant(0);
-					resizepara[3] = new Variant(localIDataSet.getProperty("mSizeY"));
+					resizepara[3] = localIDataSet.getProperty("mSizeY");
 					resizepara[4] = new Variant(0);
-					resizepara[5] = new Variant(localIDataSet.getProperty("mSizeZ"));
+					resizepara[5] = localIDataSet.getProperty("mSizeZ");
 					resizepara[6] = new Variant(0);
-					resizepara[7] = new Variant(localIDataSet.getProperty("mSizeC"));
+					resizepara[7] = localIDataSet.getProperty("mSizeC");
 					resizepara[8] = new Variant(0);
-					resizepara[9] = new Variant(localIDataSet.getProperty("mSizeT"));
+					resizepara[9] = localIDataSet.getProperty("mSizeT");
 					int imXsize = resizepara[1].changeType(Variant.VariantInt).getInt();
 					int imYsize = resizepara[3].changeType(Variant.VariantInt).getInt();
 					int imZsize = resizepara[5].changeType(Variant.VariantInt).getInt();
@@ -972,6 +1008,8 @@ public class ImarisRemoteControl extends JFrame {
 				//localIDataSet = this.mImaris.getMDataSet();
 				localIDataSet = imarisApplication.getPropertyAsComponent("mDataSet");
 				//localIDataSet.setAutoDelete(false);
+				
+				TranferScaleIJ2Imaris(localIDataSet, localImagePlus);	//sets scale in Imaris ([Edit-> ImageProperties -> geometry])
 				for (int i8 = 0; i8 < ijnSlices; ++i8) {
 					localObject1 = localImageStack.getProcessor(i8 + 1);
 					((ImageProcessor)localObject1).flipVertical();
@@ -986,8 +1024,8 @@ public class ImarisRemoteControl extends JFrame {
 						//fillSliceWithRandomValues(ijXsize, ijYsize, imtype, slice);
 						fillSliceWithStackSlice(ijXsize, ijYsize, imtype, slice, (ImageProcessor) localObject1);
 						Variant vz = new Variant(i8);
-						Variant vc = new Variant(ijCh);
-						Variant vt = new Variant(ijT);
+						Variant vc = new Variant(ijCh-1);
+						Variant vt = new Variant(ijT-1);
 						Variant vdata = new Variant(slice);
 						localIDataSet.invoke("SetDataSlice", vdata, vz, vc, vt);						
 						
@@ -1056,5 +1094,42 @@ public class ImarisRemoteControl extends JFrame {
 			return true;
 		}
 		return false;
-		}	
+	}
+
+	public boolean TranferScaleIJ2Imaris(ActiveXComponent localIDataSet, ImagePlus imp){
+		if (imp == null) return false;
+		Calibration cal = new Calibration();
+		cal = imp.getCalibration();
+		float xscale = (float) cal.pixelWidth;
+		float yscale = (float) cal.pixelHeight;
+		float zscale = (float) cal.pixelDepth;		
+		SetVoxelScale(localIDataSet, xscale, yscale, zscale);
+		
+		return true;
+	}
+	
+	public boolean SetVoxelScale(ActiveXComponent localIDataSet, 
+			float xscale, float yscale, float zscale){
+		try {
+			int imXsize = localIDataSet.getProperty("mSizeX").changeType(Variant.VariantInt).getInt();
+			int imYsize = localIDataSet.getProperty("mSizeY").changeType(Variant.VariantInt).getInt();
+			int imZsize = localIDataSet.getProperty("mSizeZ").changeType(Variant.VariantInt).getInt();
+			float Scaled_imXsize = imXsize * xscale;
+			float Scaled_imYsize = imYsize * yscale;
+			float Scaled_imZsize = imZsize * zscale;
+			localIDataSet.setProperty("mExtendMinX", new Variant(0));
+			localIDataSet.setProperty("mExtendMaxX", new Variant(Scaled_imXsize));
+			localIDataSet.setProperty("mExtendMinY", new Variant(0));
+			localIDataSet.setProperty("mExtendMaxY", new Variant(Scaled_imYsize));
+			localIDataSet.setProperty("mExtendMinZ", new Variant(0));
+			localIDataSet.setProperty("mExtendMaxZ", new Variant(Scaled_imZsize));
+
+		} catch (Exception localException3) {
+			localException3.printStackTrace();
+			IJ.showMessage("Error", "Unknown Exception occured while setting scale");
+			return false;
+		}
+		return true;
+	}
+	
 } //  @jve:decl-index=0:visual-constraint="10,10"
