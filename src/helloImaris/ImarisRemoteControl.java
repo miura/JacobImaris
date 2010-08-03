@@ -19,8 +19,10 @@ import ij.IJ;
 import ij.ImagePlus;
 import ij.ImageStack;
 import ij.WindowManager;
+import ij.gui.GenericDialog;
 import ij.measure.Calibration;
 import ij.plugin.CanvasResizer;
+import ij.plugin.Duplicator;
 import ij.process.ByteProcessor;
 import ij.process.FloatProcessor;
 import ij.process.ImageProcessor;
@@ -35,6 +37,7 @@ import javax.swing.JTextField;
 import com.jacob.activeX.ActiveXComponent;
 import com.jacob.com.SafeArray;
 import com.jacob.com.Variant;
+
 import java.awt.Checkbox;
 import java.util.Random;
 
@@ -630,14 +633,40 @@ public class ImarisRemoteControl extends JFrame {
 				public void actionPerformed(java.awt.event.ActionEvent e) {
 					//System.out.println("actionPerformed()"); 
 					ImagePlus imp = WindowManager.getCurrentImage();
-					if (imp.getNFrames()== 1){
-						ExportDataSetToImaris(imp.getNChannels(), 1, true);
-						ExportDataSetToImaris(imp.getNChannels(), 2, false);
-					}
-					else if (imp.getNFrames()> 1){}
-					else {}
-				
-											
+					if (imp.getNSlices() == 1) {
+						IJ.error("This stack does not have z-depth. Maybe set the image properties");
+					} else if (imp.getNFrames()== 1){ 
+							if (imp.getNChannels()== 1) 
+								ExportDataSetToImaris(1, 1, true);
+							else
+								IJ.error("Multichannel image not implemented");
+					} else {//Nslices > 1 and Nframes > 1		
+						if (! imp.isHyperStack())
+							IJ.error("Please conver the stack to Hyper Stack");
+						else {
+							if (imp.getNChannels()== 1) {
+								int startSlice = 0;
+								int endslice = 1;
+								for (int i = 0; i< imp.getNFrames(); i++){
+									//imp.setSlice(i * imp.getNSlices() + 1);
+									Duplicator dup = new Duplicator();
+									ImagePlus imp2 = dup.run(imp, (i * imp.getNSlices() + 1), ((i+1) * imp.getNSlices()));
+									//Extractfrom4D ext3D = new Extractfrom4D();
+									//ImagePlus imp3D = ext3D.core(imp, 3);
+									//imp3D.show();
+									if (i==0) 
+										ExportDataSetToImaris(1, i+1, true, imp2);
+									else
+										if (ExportDataSetToImaris(1, i+1, false, imp2)) 
+											IJ.log("Time Point " + Integer.toString(i+1)+ " exported.");
+									//imp3D.close();
+									//imp3D = null;
+								}
+								
+							} else
+								IJ.error("Multichannel image not implemented");
+						}
+					}	
 				}
 			});
 		}
@@ -804,17 +833,27 @@ public class ImarisRemoteControl extends JFrame {
 		return volume;
 	}
 	
+	public boolean ExportDataSetToImaris(int paramInt1, int paramInt2, boolean paramBoolean){
+		boolean done = false;
+		ImagePlus localImagePlus = IJ.getImage();
+		done = ExportDataSetToImaris(paramInt1, paramInt2, paramBoolean, 
+				localImagePlus);
+		return done;
+	}
+			
 	//modified bpImaris_Adaptor2 for use with JACOB-imaris by Volker. 
 	//implementation of export button action
 	//TODO Geometry (voxel size) should be controllable from ImageJ
 	//	--> for this, use set mExtendMinX, mExtendMaxX pair. 
-	public boolean ExportDataSetToImaris(int paramInt1, int paramInt2, boolean paramBoolean) {
+	public boolean ExportDataSetToImaris(int paramInt1, int paramInt2, boolean paramBoolean, 
+			ImagePlus localImagePlus) {
 		if (imarisApplication != null) {
+			imarisApplication.setProperty("mUserControl", true); //this keeps Imaris Opened
 			int ijCh = paramInt1;	//channel
 			int ijT = paramInt2;	//time point
  
 			boolean bool = paramBoolean;	//true if newly create a stack in Imaris. 
-			ImagePlus localImagePlus = IJ.getImage();
+			//ImagePlus localImagePlus = IJ.getImage();
 			localImagePlus.lock();
 			if (localImagePlus == null) {
 				IJ.showMessage("Please select an ImageJ image before exporting.");
@@ -1144,5 +1183,66 @@ public class ImarisRemoteControl extends JFrame {
 		}
 		return true;
 	}
+
+	public class Extractfrom4D {
+
+		private int current3DstackStart = 0; 
+		private int current3DstackEnd = 1; 
+		
+		public void run(int extractdimension){
+			ImagePlus imp = WindowManager.getCurrentImage();
+			ImagePlus imp2 = core(imp, extractdimension);
+			imp2.show();
+		}
+			
+		public ImagePlus core(ImagePlus imp, int extractdimension){
+			if (imp.getNDimensions() < 4) {
+				IJ.error("Check Image Properties: this stack has no t-dimension");
+				return null;
+			}
+			Calibration cal = new Calibration(imp);
+			int nSlices = imp.getNSlices();
+			int nFrames = imp.getNFrames();
+			int nChannels = imp.getNChannels();
+			
+			int newframes = 1; 
+			if (extractdimension == 3) {
+				getStartAndEnd3D(imp.getFrame(), nSlices, nChannels);
+			} else {	//extract a range of 4D stack
+				newframes = getStartAndEnd4D(nFrames, nSlices, nChannels);
+			}
+			
+			Duplicator dup = new Duplicator();
+			ImagePlus imp2 = dup.run(imp, current3DstackStart, current3DstackEnd);
+			if (extractdimension == 4){
+				//HyperStackConverter hyp = new HyperStackConverter();
+				//hyp.shuffle();
+				imp2.setDimensions(nChannels, nSlices, newframes);
+				imp2.setOpenAsHyperStack(true);
+			}
+			return imp2;
+		}
+		
+		void getStartAndEnd3D(int currentFrame, int nSlices, int nChannels){
+			current3DstackStart = (currentFrame-1)*nSlices*nChannels +1; 
+			current3DstackEnd = currentFrame*nSlices*nChannels; 		
+		}
+		int getStartAndEnd4D(int nFrames, int nSlices, int nChannels){
+			GenericDialog gd = new GenericDialog("Time Frame Range");
+			gd.addNumericField("Start t-Frame (>=1) :", 1, 0);
+			gd.addNumericField("End t-Frame (<"+ nFrames+") :", nFrames, 0);
+			gd.showDialog();
+			if (gd.wasCanceled()) 
+				return -1;
+			int startframe = (int) gd.getNextNumber();
+			int endframe = (int) gd.getNextNumber();
+			if ((startframe<1) || (endframe>nFrames))
+					return -1;
+			if (startframe > endframe) return -1;
+			current3DstackStart = (startframe-1)*nSlices*nChannels +1;
+			current3DstackEnd = endframe*nSlices*nChannels; 
+			return (endframe - startframe + 1);
+		}
+	}	
 	
 } //  @jve:decl-index=0:visual-constraint="10,10"
