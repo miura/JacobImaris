@@ -740,8 +740,8 @@ public class ImarisRemoteControl extends JFrame {
 	//implementation of export button action
 	public boolean ExportDataSetToImaris(int paramInt1, int paramInt2, boolean paramBoolean) {
 		if (imarisApplication != null) {
-			int i = paramInt1;
-			int j = paramInt2;
+			int imCh = paramInt1;	//channel
+			int imT = paramInt2;	//time point
  
 			boolean bool = paramBoolean;
 			ImagePlus localImagePlus = IJ.getImage();
@@ -750,25 +750,28 @@ public class ImarisRemoteControl extends JFrame {
 				IJ.showMessage("Please select an ImageJ image before exporting.");
 				return false; 
 			} 
-			int k = localImagePlus.getBitDepth();
+			int ijbitdep = localImagePlus.getBitDepth();
 			ImageStack localImageStack = localImagePlus.getStack();
-			int xsize = localImageStack.getWidth();
-			int ysize = localImageStack.getHeight();
-			int nSlices = localImageStack.getSize();	//total number of slices, regardless of t or c
+			int ijXsize = localImageStack.getWidth();
+			int ijYsize = localImageStack.getHeight();
+			int ijnSlices = localImageStack.getSize();	//total number of slices, regardless of t or c
 			int i6 = 1;
 			int i7 = 1;
+			int ijZsize = localImagePlus.getNSlices();
+			int ijTsize = localImagePlus.getNFrames();
+			int ijCsize = localImagePlus.getNChannels();
 			
 			// IDataSet localIDataSet = null;
 			ActiveXComponent localIDataSet = null;
-	/*      */         Object localObject1;
-	/*      */         Object localObject2;
-	/*      */         Object localObject3;
-	/*      */         Object localObject4;
-	/*      */         Object localObject5;
-	/*      */         Object localObject6;
-	/*      */         int i1;
-	/*      */         int i3;
-	/*      */         int i5;
+			Object localObject1;
+			Object localObject2;
+			Object localObject3;
+			Object localObject4;
+			Object localObject5;
+			Object localObject6;
+			int i1;
+			int i3;
+			int i5;
 			//try { localIDataSet = this.mImaris.getMDataSet();
 			try { localIDataSet = imarisApplication.getPropertyAsComponent("mDataSet");
 	/* 1421 */  //((Object) localIDataSet).setAutoDelete(false);
@@ -776,25 +779,25 @@ public class ImarisRemoteControl extends JFrame {
 				//create new object in Imars
 	/* 1423 */	if ((localIDataSet == null) || (bool == true)) {
 					Variant[] parameter = new Variant[6];	//In JACOB, this contains dimentional info and will be passed with 'invoke'
-					parameter[1] = new Variant(xsize);	//x
-					parameter[2] = new Variant(ysize); //y
-					parameter[3] = new Variant(nSlices); //z
+					parameter[1] = new Variant(ijXsize);	//x
+					parameter[2] = new Variant(ijYsize); //y
+					parameter[3] = new Variant(ijnSlices); //z
 					parameter[4] = new Variant(i6); //ch
 					parameter[5] = new Variant(i7); //t
-	/* 1425 */		if (k == 8)	{	//8-bit image
+	/* 1425 */		if (ijbitdep == 8)	{	//8-bit image
 						parameter[0] = new Variant(1);	//type 8bit
 						localIDataSet.invoke("Create", parameter);		
 	/* 1427 */			//localIDataSet.create(new tType_(1L), new UInt32(l), new UInt32(i2), new UInt32(i4), new UInt32(i6), new UInt32(i7));
-	/* 1428 */		} else if (k == 16) {
+	/* 1428 */		} else if (ijbitdep == 16) {
 							parameter[0] = new Variant(2);	//type 16 bit
 							localIDataSet.invoke("Create", parameter);				
 	/* 1430 */              //localIDataSet.create(new tType_(2L), new UInt32(l), new UInt32(i2), new UInt32(i4), new UInt32(i6), new UInt32(i7));
-	/* 1431 */		} else if (k == 32) {
+	/* 1431 */		} else if (ijbitdep == 32) {
 								parameter[0] = new Variant(3);	//type 32 bit
 								localIDataSet.invoke("Create", parameter);						
 	/* 1433 */              	//localIDataSet.create(new tType_(3L), new UInt32(l), new UInt32(i2), new UInt32(i4), new UInt32(i6), new UInt32(i7)); 
 					} else {
-	/* 1434 */				if (k == 24) {
+	/* 1434 */				if (ijbitdep == 24) {
 	/* 1437 */					IJ.showMessage("Error", "Please use an image of type 8, 16 or float.");
 	/* 1438 */					localImagePlus.unlock();
 	/* 1439 */					//localIDataSet.release(); //this method does not exist for ActiveX component
@@ -807,8 +810,8 @@ public class ImarisRemoteControl extends JFrame {
 	/* 1446 */				localIDataSet = null;
 	/* 1447 */				return false;
 	/*      */		}
-	/* 1451 */		i = 1;
-	/* 1452 */		j = 1;
+	/* 1451 */		imCh = 1;
+	/* 1452 */		imT = 1;
 				//append objects to the current object already in Imaris	
 				//TODO: implement resize protocol. 
 	/*      */	} else { 
@@ -839,7 +842,7 @@ public class ImarisRemoteControl extends JFrame {
 					
 					// check image size and reject 
 	/* 1465 */		//if (((k == 8) && (((tType_)localObject5).getValue() != 1L)) || ((k == 16) && (((tType_)localObject5).getValue() != 2L)) || ((k == 32) && (((tType_)localObject5).getValue() != 3L)))
-					if (((k == 8) && (imtype != 1)) || ((k == 16) && (imtype != 2)) || ((k == 32) && (imtype != 3)))
+					if (((ijbitdep == 8) && (imtype != 1)) || ((ijbitdep == 16) && (imtype != 2)) || ((ijbitdep == 32) && (imtype != 3)))
 					{
 	/* 1468 */			IJ.showMessage("Error", "The type of the ImageJ DataSet is not the same as Imaris DataSet!");
 	/* 1469 */			localImagePlus.unlock();
@@ -847,7 +850,7 @@ public class ImarisRemoteControl extends JFrame {
 	/* 1471 */			localIDataSet = null;
 	/* 1472 */			return false; 
 					}
-	/* 1473 */		if (k == 24) {
+	/* 1473 */		if (ijbitdep == 24) {
 	/* 1474 */			IJ.showMessage("Error", "ImageJ RGB type is not yet usable. Please convert to 8,16 or 32 bit image.");
 	/* 1475 */			localImagePlus.unlock();
 	/* 1476 */			//localIDataSet.release();
@@ -857,54 +860,54 @@ public class ImarisRemoteControl extends JFrame {
 					// check image size and resize 
 					//TODO these resizing are too crude. should eliminate or fix. 
 	/* 1483 */		//if (((int)localUInt32.getValue() != xsize) || ((int)((UInt32)localObject1).getValue() != ysize) || ((int)((UInt32)localObject2).getValue() != nSlices))
-					if ((imXsize != xsize) 
-							|| (imYsize != ysize) 
-								|| (imZsize != nSlices))
+					if ((imXsize != ijXsize) 
+							|| (imYsize != ijYsize) 
+								|| (imZsize != ijnSlices))
 	/*      */		{
-	/* 1485 */			if (imXsize < xsize) {
+	/* 1485 */			if (imXsize < ijXsize) {
 	/* 1486 */				//localIDataSet.resize(new Int32(0), new UInt32(xsize), new Int32(0), (UInt32)localObject1, new Int32(0), (UInt32)localObject2, new Int32(0), (UInt32)localObject3, new Int32(0), (UInt32)localObject4);
-							resizepara[1] = new Variant(xsize);
+							resizepara[1] = new Variant(ijXsize);
 							localIDataSet.invoke("Resize", resizepara);
 	/* 1487 */				//localUInt32.setValue(xsize);
-							imXsize = xsize;
+							imXsize = ijXsize;
 						}
-	/* 1490 */			else if (imXsize > xsize) {
+	/* 1490 */			else if (imXsize > ijXsize) {
 	/* 1491 */				localObject6 = new CanvasResizer();
 	/* 1492 */				//localImageStack = ((CanvasResizer)localObject6).expandStack(localImageStack, (int)localUInt32.getValue(), ysize, 0, 0);
-							localImageStack = ((CanvasResizer)localObject6).expandStack(localImageStack, imXsize, ysize, 0, 0);
+							localImageStack = ((CanvasResizer)localObject6).expandStack(localImageStack, imXsize, ijYsize, 0, 0);
 	/* 1493 */				//i1 = (int)localUInt32.getValue();
 							i1 = imXsize;
 	/*      */			}
  
-	/* 1497 */			if (imYsize < ysize) {
+	/* 1497 */			if (imYsize < ijYsize) {
 	/* 1498 */				//localIDataSet.resize(new Int32(0), localUInt32, new Int32(0), new UInt32(ysize), new Int32(0), (UInt32)localObject2, new Int32(0), (UInt32)localObject3, new Int32(0), (UInt32)localObject4);
-							resizepara[3] = new Variant(ysize);
+							resizepara[3] = new Variant(ijYsize);
 							localIDataSet.invoke("Resize", resizepara);
 	/* 1499 */				//((UInt32)localObject1).setValue(ysize);
-							imYsize = ysize;
+							imYsize = ijYsize;
 	/*      */			}
-	/* 1502 */			else if (imYsize > ysize) {
+	/* 1502 */			else if (imYsize > ijYsize) {
 	/* 1503 */				localObject6 = new CanvasResizer();
 	/* 1504 */				//localImageStack = ((CanvasResizer)localObject6).expandStack(localImageStack, i1, (int)((UInt32)localObject1).getValue(), 0, 0);
 							localImageStack = ((CanvasResizer)localObject6).expandStack(localImageStack, i1, imYsize, 0, 0);
 	/* 1505 */				i3 = imYsize;//(int)((UInt32)localObject1).getValue();
 						}
 
-	/* 1509 */			if (imZsize < nSlices) {
+	/* 1509 */			if (imZsize < ijnSlices) {
 	/* 1510 */				//localIDataSet.resize(new Int32(0), localUInt32, new Int32(0), 
 								//(UInt32)localObject1, new Int32(0), new UInt32(nSlices), new Int32(0), 
 									//(UInt32)localObject3, new Int32(0), (UInt32)localObject4);
-							resizepara[5] = new Variant(nSlices);
+							resizepara[5] = new Variant(ijnSlices);
 							localIDataSet.invoke("Resize", resizepara);							
-	/* 1511 */				imZsize = nSlices;//((UInt32)localObject2).setValue(nSlices);
+	/* 1511 */				imZsize = ijnSlices;//((UInt32)localObject2).setValue(nSlices);
 							
 						}
-	/* 1514 */			else if (imZsize > nSlices) {
-	/* 1516 */				if (k == 8) {
+	/* 1514 */			else if (imZsize > ijnSlices) {
+	/* 1516 */				if (ijbitdep == 8) {
 	/* 1517 */					localObject6 = new ByteProcessor(i1, i3);
-	/* 1518 */				} else if (k == 16) {
+	/* 1518 */				} else if (ijbitdep == 16) {
 	/* 1519 */					localObject6 = new ShortProcessor(i1, i3);
-	/* 1520 */				} else if (k == 32) {
+	/* 1520 */				} else if (ijbitdep == 32) {
 	/* 1521 */					localObject6 = new FloatProcessor(i1, i3);
 	/*      */				} else {
 	/* 1523 */                   localImagePlus.unlock();
@@ -914,7 +917,7 @@ public class ImarisRemoteControl extends JFrame {
 							}
 	/* 1528 */				((ImageProcessor)localObject6).setColor(new Color(0.0F, 0.0F, 0.0F));
 	/* 1529 */				//for (int i11 = 0; i11 < (int)((UInt32)localObject2).getValue() - nSlices; ++i11) {
-							for (int i11 = 0; i11 < imZsize - nSlices; ++i11) {
+							for (int i11 = 0; i11 < imZsize - ijnSlices; ++i11) {
 	/* 1530 */					localImageStack.addSlice("", (ImageProcessor)localObject6);
 							}
 	/* 1532 */				i5 = imZsize;//(int)((UInt32)localObject2).getValue();
@@ -922,24 +925,24 @@ public class ImarisRemoteControl extends JFrame {
 					}
 					//channel exceeds
 	/* 1538 */		//if (i > (int)((UInt32)localObject3).getValue()) {
-					if (i > imCsize) {
+					if (imCh > imCsize) {
 	/* 1539 */			//localObject3 = new UInt32(((UInt32)localObject3).getValue() + 1L);
 						localObject3 = new Variant(imCsize + 1);
 	/* 1540 */			//i = (int)((UInt32)localObject3).getValue();
-						i = imCsize;
+						imCh = imCsize;
 	/* 1541 */			//localIDataSet.resize(new Int32(0), localUInt32, new Int32(0), (UInt32)localObject1, new Int32(0), (UInt32)localObject2, new Int32(0), new UInt32(i), new Int32(0), (UInt32)localObject4);
-						resizepara[7] = new Variant(i);
+						resizepara[7] = new Variant(imCh);
 						localIDataSet.invoke("Resize", resizepara);	
 					}
 
 	/* 1544 */		//if (j > (int)((UInt32)localObject4).getValue()) {
-					if (j > imTsize) {
+					if (imT > imTsize) {
 	/* 1545 */			//localObject4 = new UInt32(((UInt32)localObject4).getValue() + 1L);
 						localObject4 = new Variant(imTsize + 1);
 	/* 1546 */			//j = (int)((UInt32)localObject4).getValue();
-						j = imTsize;
+						imT = imTsize;
 	/* 1547 */			//localIDataSet.resize(new Int32(0), localUInt32, new Int32(0), (UInt32)localObject1, new Int32(0), (UInt32)localObject2, new Int32(0), (UInt32)localObject3, new Int32(0), new UInt32(j));
-						resizepara[9] = new Variant(j);
+						resizepara[9] = new Variant(imT);
 						localIDataSet.invoke("Resize", resizepara);	
 					}
 				}
@@ -963,7 +966,7 @@ public class ImarisRemoteControl extends JFrame {
 				for (int i8 = 0; i8 < i5; ++i8) {
 					localObject1 = localImageStack.getProcessor(i8 + 1);
 					((ImageProcessor)localObject1).flipVertical();
-					if ((k == 8) || (k == 16) || (k == 32)){
+					if ((ijbitdep == 8) || (ijbitdep == 16) || (ijbitdep == 32)){
 //					if (k == 8) {
 //						localObject2 = (byte[])localImageStack.getPixels(i8 + 1);
 //						localObject3 = new SafeArrayBound[] { new SafeArrayBound(i1, 0), new SafeArrayBound(i3, 0) };
@@ -998,7 +1001,7 @@ public class ImarisRemoteControl extends JFrame {
 //						localIDataSet.setDataSlice((Variant)localObject6, new UInt32(i8), new UInt32(i - 1), new UInt32(j - 1));
 //						
 					} else {
-						if (k == 24) {
+						if (ijbitdep == 24) {
 							IJ.showMessage("Error", "RGB images cannot be exported now, please use 8,16 or 32-bit images");
 							localImagePlus.unlock();
 							//localIDataSet.release();
