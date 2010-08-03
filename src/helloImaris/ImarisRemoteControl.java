@@ -730,6 +730,38 @@ public class ImarisRemoteControl extends JFrame {
 			}
 		}
 	}
+
+	private void fillVolumeWithStack(int xSize, int ySize, int zSize, int type, 
+			SafeArray stack, ImageStack ims) {
+
+		int[] xyzCoord = new int[3];
+		int pixvalue = 0;
+		int currentpos = 0;
+		byte[] pixelsByte = new byte[xSize * ySize];
+		char[] pixelsChar = new char[xSize * ySize];
+		float[] pixels  = new float[xSize * ySize];		
+		for (int z = 0; z < zSize; z++) {
+			if (type == 1) pixelsByte = (byte[]) ims.getProcessor(z+1).getPixels();	
+			if (type == 2) pixelsChar = (char[]) ims.getProcessor(z+1).getPixels();	
+			if (type == 3) pixels = (float[]) ims.getProcessor(z+1).getPixels();				
+			for (int y = 0; y < ySize; y++) {
+				for (int x = 0; x < xSize; x++) {
+					currentpos = xSize * y + x; 
+					xyzCoord[0] = x;
+					xyzCoord[1] = y;
+					xyzCoord[2] = z;
+					if (type != 2 && type != 3)
+						stack.setByte(xyzCoord, (byte) pixelsByte[currentpos]);
+					if (type == 2) 
+						stack.setChar(xyzCoord, (char) pixelsChar[currentpos]);
+					if (type == 3) 
+						stack.setFloat(xyzCoord, (float) pixelsChar[currentpos]);
+
+				}
+			}
+		}
+	}
+	
 	
 	
 	/**
@@ -801,64 +833,66 @@ public class ImarisRemoteControl extends JFrame {
 			
 			// IDataSet localIDataSet = null;
 			ActiveXComponent localIDataSet = null;
-			Object localObject1;
-			Object localObject2;
+//			Object localObject1;
+//			Object localObject2;
 			Object localObject3;
 			Object localObject4;
-			Object localObject5;
+//			Object localObject5;
 			Object localObject6;
 			int i1;
 			int i3;
 			int i5;
 			//try { localIDataSet = this.mImaris.getMDataSet();
 			try { localIDataSet = imarisApplication.getPropertyAsComponent("mDataSet");
-	/* 1421 */  //((Object) localIDataSet).setAutoDelete(false);
+				//((Object) localIDataSet).setAutoDelete(false);
 			
 				//create new object in Imars
-	/* 1423 */	if ((localIDataSet == null) || (bool == true)) {
+				if ((localIDataSet == null) || (bool == true)) {
 					Variant[] parameter = new Variant[6];	//In JACOB, this contains dimentional info and will be passed with 'invoke'
 					parameter[1] = new Variant(ijXsize);	//x
 					parameter[2] = new Variant(ijYsize); //y
 					parameter[3] = new Variant(ijnSlices); //z
 					parameter[4] = new Variant(i6); //ch
 					parameter[5] = new Variant(i7); //t
-	/* 1425 */		if (ijbitdep == 8)	{	//8-bit image
+					if (ijbitdep == 8)	{	//8-bit image
 						parameter[0] = new Variant(1);	//type 8bit
 						localIDataSet.invoke("Create", parameter);		
-	/* 1427 */			//localIDataSet.create(new tType_(1L), new UInt32(l), new UInt32(i2), new UInt32(i4), new UInt32(i6), new UInt32(i7));
-	/* 1428 */		} else if (ijbitdep == 16) {
+						//localIDataSet.create(new tType_(1L), new UInt32(l), new UInt32(i2), new UInt32(i4), new UInt32(i6), new UInt32(i7));
+					} else if (ijbitdep == 16) {
 							parameter[0] = new Variant(2);	//type 16 bit
 							localIDataSet.invoke("Create", parameter);				
-	/* 1430 */              //localIDataSet.create(new tType_(2L), new UInt32(l), new UInt32(i2), new UInt32(i4), new UInt32(i6), new UInt32(i7));
-	/* 1431 */		} else if (ijbitdep == 32) {
+							//localIDataSet.create(new tType_(2L), new UInt32(l), new UInt32(i2), new UInt32(i4), new UInt32(i6), new UInt32(i7));
+					} else if (ijbitdep == 32) {
 								parameter[0] = new Variant(3);	//type 32 bit
 								localIDataSet.invoke("Create", parameter);						
-	/* 1433 */              	//localIDataSet.create(new tType_(3L), new UInt32(l), new UInt32(i2), new UInt32(i4), new UInt32(i6), new UInt32(i7)); 
+								//localIDataSet.create(new tType_(3L), new UInt32(l), new UInt32(i2), new UInt32(i4), new UInt32(i6), new UInt32(i7)); 
 					} else {
-	/* 1434 */				if (ijbitdep == 24) {
-	/* 1437 */					IJ.showMessage("Error", "Please use an image of type 8, 16 or float.");
-	/* 1438 */					localImagePlus.unlock();
-	/* 1439 */					//localIDataSet.release(); //this method does not exist for ActiveX component
-	/* 1440 */					localIDataSet = null;
-	/* 1441 */					return false;
-	/*      */				}
-	/* 1443 */				IJ.showMessage("Error", "Unknown image type");
-	/* 1444 */				localImagePlus.unlock();
-	/* 1445 */				//localIDataSet.release();
-	/* 1446 */				localIDataSet = null;
-	/* 1447 */				return false;
-	/*      */		}
-	/* 1451 */		ijCh = 1;
-	/* 1452 */		ijT = 1;
+						if (ijbitdep == 24) {
+							IJ.showMessage("Error", "Please use an image of type 8, 16 or float.");
+							localImagePlus.unlock();
+							//localIDataSet.release();
+							localIDataSet.safeRelease();
+							localIDataSet = null;
+							return false;
+						}
+						IJ.showMessage("Error", "Unknown image type");
+						localImagePlus.unlock();
+						//localIDataSet.release();
+						localIDataSet.safeRelease();
+						localIDataSet = null;
+						return false;
+					}
+					ijCh = 1;
+					ijT = 1;
 				//append objects to the current object already in Imaris	
 				//TODO: implement resize protocol. 
-	/*      */	} else { 
-	/* 1457 */		//UInt32 localUInt32 = localIDataSet.getMSizeX();	//TODO I don't understand why specificallt this xsize is UInt32.
-	/* 1458 */		//localObject1 = localIDataSet.getMSizeY();
-	/* 1459 */		//localObject2 = localIDataSet.getMSizeZ();
-	/* 1460 */		//localObject3 = localIDataSet.getMSizeC();
-	/* 1461 */		//localObject4 = localIDataSet.getMSizeT();
-	/* 1462 */		//localObject5 = localIDataSet.getMType();
+				} else { 
+					//UInt32 localUInt32 = localIDataSet.getMSizeX();	//TODO I don't understand why specificallt this xsize is UInt32.
+					//localObject1 = localIDataSet.getMSizeY();
+					//localObject2 = localIDataSet.getMSizeZ();
+					//localObject3 = localIDataSet.getMSizeC();
+					//localObject4 = localIDataSet.getMSizeT();
+					//localObject5 = localIDataSet.getMType();
 					Variant[] resizepara = new Variant[10];
 					resizepara[0] = new Variant(0);
 					//resizepara[1] = new Variant(localIDataSet.getProperty("mSizeX"));
@@ -880,216 +914,195 @@ public class ImarisRemoteControl extends JFrame {
 					int imtype = localIDataSet.getPropertyAsInt("mType");	//bit depth: 0 = unknown, 1 = 8bit. 2 = 16bit, 3 = 32bit float
 					
 					// check image size and reject 
-	/* 1465 */		//if (((k == 8) && (((tType_)localObject5).getValue() != 1L)) || ((k == 16) && (((tType_)localObject5).getValue() != 2L)) || ((k == 32) && (((tType_)localObject5).getValue() != 3L)))
+					//if (((k == 8) && (((tType_)localObject5).getValue() != 1L)) || ((k == 16) && (((tType_)localObject5).getValue() != 2L)) || ((k == 32) && (((tType_)localObject5).getValue() != 3L)))
 					if (((ijbitdep == 8) && (imtype != 1)) || ((ijbitdep == 16) && (imtype != 2)) || ((ijbitdep == 32) && (imtype != 3)))
 					{
-	/* 1468 */			IJ.showMessage("Error", "The type of the ImageJ DataSet is not the same as Imaris DataSet!");
-	/* 1469 */			localImagePlus.unlock();
-	/* 1470 */			//localIDataSet.release();
-	/* 1471 */			localIDataSet = null;
-	/* 1472 */			return false; 
+						IJ.showMessage("Error", "The type of the ImageJ DataSet is not the same as Imaris DataSet!");
+						localImagePlus.unlock();
+						//localIDataSet.release();
+						localIDataSet = null;
+						return false; 
 					}
-	/* 1473 */		if (ijbitdep == 24) {
-	/* 1474 */			IJ.showMessage("Error", "ImageJ RGB type is not yet usable. Please convert to 8,16 or 32 bit image.");
-	/* 1475 */			localImagePlus.unlock();
-	/* 1476 */			//localIDataSet.release();
-	/* 1477 */			localIDataSet = null;
-	/* 1478 */			return false;
+					if (ijbitdep == 24) {
+						IJ.showMessage("Error", "ImageJ RGB type is not yet usable. Please convert to 8,16 or 32 bit image.");
+						localImagePlus.unlock();
+						//localIDataSet.release();
+						localIDataSet = null;
+						return false;
 					}
 					// check image size and resize. Expand to fit larger of either IJimage or imImage. 
 					//TODO these resizing are too crude. should eliminate or fix. 
 					// e.g. resizing origin point is always (0, 0)
-	/* 1483 */		//if (((int)localUInt32.getValue() != xsize) || ((int)((UInt32)localObject1).getValue() != ysize) || ((int)((UInt32)localObject2).getValue() != nSlices))
+					//if (((int)localUInt32.getValue() != xsize) || ((int)((UInt32)localObject1).getValue() != ysize) || ((int)((UInt32)localObject2).getValue() != nSlices))
 					if ((imXsize != ijXsize) 
 							|| (imYsize != ijYsize) 
 								|| (imZsize != ijnSlices))
-	/*      */		{
-	/* 1485 */			if (imXsize < ijXsize) {
-	/* 1486 */				//localIDataSet.resize(new Int32(0), new UInt32(xsize), new Int32(0), (UInt32)localObject1, new Int32(0), (UInt32)localObject2, new Int32(0), (UInt32)localObject3, new Int32(0), (UInt32)localObject4);
+					{
+						if (imXsize < ijXsize) {
+							//localIDataSet.resize(new Int32(0), new UInt32(xsize), new Int32(0), (UInt32)localObject1, new Int32(0), (UInt32)localObject2, new Int32(0), (UInt32)localObject3, new Int32(0), (UInt32)localObject4);
 							resizepara[1] = new Variant(ijXsize);
 							localIDataSet.invoke("Resize", resizepara);
-	/* 1487 */				//localUInt32.setValue(xsize);
+							//localUInt32.setValue(xsize);
 							imXsize = ijXsize;
 						}
-	/* 1490 */			else if (imXsize > ijXsize) {
-	/* 1491 */				localObject6 = new CanvasResizer();
-	/* 1492 */				//localImageStack = ((CanvasResizer)localObject6).expandStack(localImageStack, (int)localUInt32.getValue(), ysize, 0, 0);
+						else if (imXsize > ijXsize) {
+							localObject6 = new CanvasResizer();
+							//localImageStack = ((CanvasResizer)localObject6).expandStack(localImageStack, (int)localUInt32.getValue(), ysize, 0, 0);
 							localImageStack = ((CanvasResizer)localObject6).expandStack(localImageStack, imXsize, ijYsize, 0, 0);
-	/* 1493 */				//i1 = (int)localUInt32.getValue();
+							//i1 = (int)localUInt32.getValue();
 							//i1 = imXsize;
 							ijXsize = imXsize;
-	/*      */			}
+						}
  
-	/* 1497 */			if (imYsize < ijYsize) {
-	/* 1498 */				//localIDataSet.resize(new Int32(0), localUInt32, new Int32(0), new UInt32(ysize), new Int32(0), (UInt32)localObject2, new Int32(0), (UInt32)localObject3, new Int32(0), (UInt32)localObject4);
+						if (imYsize < ijYsize) {
+							//localIDataSet.resize(new Int32(0), localUInt32, new Int32(0), new UInt32(ysize), new Int32(0), (UInt32)localObject2, new Int32(0), (UInt32)localObject3, new Int32(0), (UInt32)localObject4);
 							resizepara[3] = new Variant(ijYsize);
 							localIDataSet.invoke("Resize", resizepara);
-	/* 1499 */				//((UInt32)localObject1).setValue(ysize);
+							//((UInt32)localObject1).setValue(ysize);
 							imYsize = ijYsize;
-	/*      */			}
-	/* 1502 */			else if (imYsize > ijYsize) {
-	/* 1503 */				localObject6 = new CanvasResizer();
-	/* 1504 */				//localImageStack = ((CanvasResizer)localObject6).expandStack(localImageStack, i1, (int)((UInt32)localObject1).getValue(), 0, 0);
+						}
+						else if (imYsize > ijYsize) {
+							localObject6 = new CanvasResizer();
+							//localImageStack = ((CanvasResizer)localObject6).expandStack(localImageStack, i1, (int)((UInt32)localObject1).getValue(), 0, 0);
 							localImageStack = ((CanvasResizer)localObject6).expandStack(localImageStack, ijXsize, imYsize, 0, 0);
-	/* 1505 */				//i3 = imYsize;//(int)((UInt32)localObject1).getValue();
+							//i3 = imYsize;//(int)((UInt32)localObject1).getValue();
 							ijYsize = imXsize;
 						}
 
-	/* 1509 */			if (imZsize < ijnSlices) {
-	/* 1510 */				//localIDataSet.resize(new Int32(0), localUInt32, new Int32(0), 
+						if (imZsize < ijnSlices) {
+							//localIDataSet.resize(new Int32(0), localUInt32, new Int32(0), 
 								//(UInt32)localObject1, new Int32(0), new UInt32(nSlices), new Int32(0), 
 									//(UInt32)localObject3, new Int32(0), (UInt32)localObject4);
 							resizepara[5] = new Variant(ijnSlices);
 							localIDataSet.invoke("Resize", resizepara);							
-	/* 1511 */				imZsize = ijnSlices;//((UInt32)localObject2).setValue(nSlices);
+							imZsize = ijnSlices;//((UInt32)localObject2).setValue(nSlices);
 						}
 	
-	/* 1514 */			else if (imZsize > ijnSlices) {
-	/* 1516 */				if (ijbitdep == 8) {
-	/* 1517 */					localObject6 = new ByteProcessor(ijXsize, ijYsize);
-	/* 1518 */				} else if (ijbitdep == 16) {
-	/* 1519 */					localObject6 = new ShortProcessor(ijXsize, ijYsize);
-	/* 1520 */				} else if (ijbitdep == 32) {
-	/* 1521 */					localObject6 = new FloatProcessor(ijXsize, ijYsize);
-	/*      */				} else {
-	/* 1523 */                   localImagePlus.unlock();
-	/* 1524 */                   //localIDataSet.release();
-	/* 1525 */                   localIDataSet = null;
-	/* 1526 */                   return false;
+						else if (imZsize > ijnSlices) {
+							if (ijbitdep == 8) {
+								localObject6 = new ByteProcessor(ijXsize, ijYsize);
+							} else if (ijbitdep == 16) {
+								localObject6 = new ShortProcessor(ijXsize, ijYsize);
+							} else if (ijbitdep == 32) {
+								localObject6 = new FloatProcessor(ijXsize, ijYsize);
+							} else {
+								localImagePlus.unlock();
+								//localIDataSet.release();
+								localIDataSet = null;
+								return false;
 							}
-	/* 1528 */				((ImageProcessor)localObject6).setColor(new Color(0.0F, 0.0F, 0.0F));
-	/* 1529 */				//for (int i11 = 0; i11 < (int)((UInt32)localObject2).getValue() - nSlices; ++i11) {
+							((ImageProcessor)localObject6).setColor(new Color(0.0F, 0.0F, 0.0F));
+							//for (int i11 = 0; i11 < (int)((UInt32)localObject2).getValue() - nSlices; ++i11) {
 							for (int i11 = 0; i11 < imZsize - ijnSlices; ++i11) {
-	/* 1530 */					localImageStack.addSlice("", (ImageProcessor)localObject6);
+								localImageStack.addSlice("", (ImageProcessor)localObject6);
 							}
-	/* 1532 */				//i5 = imZsize;//(int)((UInt32)localObject2).getValue();
+							//i5 = imZsize;//(int)((UInt32)localObject2).getValue();
 							ijnSlices = imZsize;
 						}
 					}
 					//channel exceeds
-	/* 1538 */		//if (i > (int)((UInt32)localObject3).getValue()) {
+					//if (i > (int)((UInt32)localObject3).getValue()) {
 					if (ijCh > imCsize) {
-	/* 1539 */			//localObject3 = new UInt32(((UInt32)localObject3).getValue() + 1L);
+						//localObject3 = new UInt32(((UInt32)localObject3).getValue() + 1L);
 						localObject3 = new Variant(imCsize + 1);
-	/* 1540 */			//i = (int)((UInt32)localObject3).getValue();
+						//i = (int)((UInt32)localObject3).getValue();
 						//ijCh = imCsize;
-	/* 1541 */			//localIDataSet.resize(new Int32(0), localUInt32, new Int32(0), (UInt32)localObject1, new Int32(0), (UInt32)localObject2, new Int32(0), new UInt32(i), new Int32(0), (UInt32)localObject4);
+						//localIDataSet.resize(new Int32(0), localUInt32, new Int32(0), (UInt32)localObject1, new Int32(0), (UInt32)localObject2, new Int32(0), new UInt32(i), new Int32(0), (UInt32)localObject4);
 						resizepara[7] = new Variant(ijCh);
 						localIDataSet.invoke("Resize", resizepara);
 						imCsize = ijCh;
 					}
 
-	/* 1544 */		//if (j > (int)((UInt32)localObject4).getValue()) {
+					//if (j > (int)((UInt32)localObject4).getValue()) {
 					if (ijT > imTsize) {
-	/* 1545 */			//localObject4 = new UInt32(((UInt32)localObject4).getValue() + 1L);
+						//localObject4 = new UInt32(((UInt32)localObject4).getValue() + 1L);
 						localObject4 = new Variant(imTsize + 1);
-	/* 1546 */			//j = (int)((UInt32)localObject4).getValue();
+						//j = (int)((UInt32)localObject4).getValue();
 						//ijT = imTsize;
-	/* 1547 */			//localIDataSet.resize(new Int32(0), localUInt32, new Int32(0), (UInt32)localObject1, new Int32(0), (UInt32)localObject2, new Int32(0), (UInt32)localObject3, new Int32(0), new UInt32(j));
+						//localIDataSet.resize(new Int32(0), localUInt32, new Int32(0), (UInt32)localObject1, new Int32(0), (UInt32)localObject2, new Int32(0), (UInt32)localObject3, new Int32(0), new UInt32(j));
 						resizepara[9] = new Variant(ijT);
 						localIDataSet.invoke("Resize", resizepara);
 						imTsize = ijT;
 					}
 				}
-	/* 1550 */	//localIDataSet.release();
-	/* 1551 */	localIDataSet = null;
+				//localIDataSet.release();
+				localIDataSet = null;
 	
 			} catch (Exception localException1) {
 
-				/* 1553 */	localException1.printStackTrace();
-	/* 1554 */	IJ.showMessage("Error", "Unknown Exception occured");
-	/* 1555 */	localImagePlus.unlock();
-	/* 1556 */	//localIDataSet.release();
-	/* 1557 */	localIDataSet = null;
-	/* 1558 */	return false;
+				localException1.printStackTrace();
+				IJ.showMessage("Error", "Unknown Exception occured");
+				localImagePlus.unlock();
+				//localIDataSet.release();
+				localIDataSet = null;
+				return false;
 			}
 					// Send the data to Imaris...
 			try {
 				//localIDataSet = this.mImaris.getMDataSet();
 				localIDataSet = imarisApplication.getPropertyAsComponent("mDataSet");
 				//localIDataSet.setAutoDelete(false);
-				
-				TranferScaleIJ2Imaris(localIDataSet, localImagePlus);	//sets scale in Imaris ([Edit-> ImageProperties -> geometry])
-				for (int i8 = 0; i8 < ijnSlices; ++i8) {
-					localObject1 = localImageStack.getProcessor(i8 + 1);
-					((ImageProcessor)localObject1).flipVertical();
-					if ((ijbitdep == 8) || (ijbitdep == 16) || (ijbitdep == 32)){
-						int imtype = 0;
-						if (ijbitdep == 8) imtype = 1;
-						if (ijbitdep == 16) imtype = 2;
-						if (ijbitdep == 32) imtype = 3;
+				if ((ijbitdep == 8) || (ijbitdep == 16) || (ijbitdep == 32)){				
+					int imtype = 0;
+					if (ijbitdep == 8) imtype = 1;
+					if (ijbitdep == 16) imtype = 2;
+					if (ijbitdep == 32) imtype = 3;
+					TranferScaleIJ2Imaris(localIDataSet, localImagePlus);	//sets scale in Imaris ([Edit-> ImageProperties -> geometry])
+/* old version, slice by slice
+					for (int i8 = 0; i8 < ijnSlices; ++i8) {
+						localObject1 = localImageStack.getProcessor(i8 + 1);
+						((ImageProcessor)localObject1).flipVertical();
+	
 						
 						SafeArray slice;
 						slice = createEmptySliceFor(ijXsize, ijYsize, imtype);
-						//fillSliceWithRandomValues(ijXsize, ijYsize, imtype, slice);
 						fillSliceWithStackSlice(ijXsize, ijYsize, imtype, slice, (ImageProcessor) localObject1);
 						Variant vz = new Variant(i8);
 						Variant vc = new Variant(ijCh-1);
 						Variant vt = new Variant(ijT-1);
 						Variant vdata = new Variant(slice);
 						localIDataSet.invoke("SetDataSlice", vdata, vz, vc, vt);						
-						
-//					if (k == 8) {
-//						localObject2 = (byte[])localImageStack.getPixels(i8 + 1);
-//						localObject3 = new SafeArrayBound[] { new SafeArrayBound(i1, 0), new SafeArrayBound(i3, 0) };
-//						localObject4 = new SafeArray(localObject3, localObject2);
-//						localObject5 = new Variant((SafeArray)localObject4);
-//						localIDataSet.setDataSlice((Variant)localObject5, new UInt32(i8), new UInt32(i - 1), new UInt32(j - 1));
-//					}
-//					else if (k == 16) {
-//						localObject2 = (short[])localImageStack.getPixels(i8 + 1);
-//						localObject3 = new SafeArrayBound[] { new SafeArrayBound(i1, 0), new SafeArrayBound(i3, 0) };
-//						localObject4 = new byte[2 * localObject2.length];
-//						for (int i9 = 0; i9 < localObject2.length; ++i9) {
-//							localObject4[(2 * i9)] = (byte)(0xFF & localObject2[i9]);
-//							localObject4[(2 * i9 + 1)] = (byte)(0xFF & localObject2[i9] >> 8);
-//						}
-//						SafeArray localSafeArray1 = new SafeArray(localObject3, localObject4, (bpImaris_Adapter2.class$com$jniwrapper$UInt16 == null) ? (bpImaris_Adapter2.class$com$jniwrapper$UInt16 = bpImaris_Adapter2.class$("com.jniwrapper.UInt16")) : bpImaris_Adapter2.class$com$jniwrapper$UInt16);
-//						localObject6 = new Variant(localSafeArray1);
-//						localIDataSet.setDataSlice((Variant)localObject6, new UInt32(i8), new UInt32(i - 1), new UInt32(j - 1));
-//					}
-//					else if (k == 32) {
-//						localObject2 = (float[])localImageStack.getPixels(i8 + 1);
-//						localObject3 = new SafeArrayBound[] { new SafeArrayBound(i1, 0), new SafeArrayBound(i3, 0) };
-//						localObject4 = new byte[4 * localObject2.length];
-//						for (int i10 = 0; i10 < localObject2.length; ++i10) {
-//							localObject4[(4 * i10)] = (byte)(0xFF & Float.floatToIntBits(localObject2[i10]));
-//							localObject4[(4 * i10 + 1)] = (byte)(0xFF & Float.floatToIntBits(localObject2[i10]) >> 8);
-//							localObject4[(4 * i10 + 2)] = (byte)(0xFF & Float.floatToIntBits(localObject2[i10]) >> 16);
-//							localObject4[(4 * i10 + 3)] = (byte)(0xFF & Float.floatToIntBits(localObject2[i10]) >> 24);
-//						}
-//						SafeArray localSafeArray2 = new SafeArray(localObject3, localObject4, (bpImaris_Adapter2.class$com$jniwrapper$SingleFloat == null) ? (bpImaris_Adapter2.class$com$jniwrapper$SingleFloat = bpImaris_Adapter2.class$("com.jniwrapper.SingleFloat")) : bpImaris_Adapter2.class$com$jniwrapper$SingleFloat);
-//						localObject6 = new Variant(localSafeArray2);
-//						localIDataSet.setDataSlice((Variant)localObject6, new UInt32(i8), new UInt32(i - 1), new UInt32(j - 1));
-//						
-					} else {
-						if (ijbitdep == 24) {
-							IJ.showMessage("Error", "RGB images cannot be exported now, please use 8,16 or 32-bit images");
-							localImagePlus.unlock();
-							//localIDataSet.release();
-							localIDataSet = null;
-							return false;
-						}
-						IJ.showMessage("Error", "Unknown image type");
+						((ImageProcessor)localObject1).flipVertical();
+						IJ.showProgress(i8, localImageStack.getSize() - 1);							
+					}
+*/					
+					SafeArray volume;
+					volume = createEmptyVolumeFor(ijXsize, ijYsize, ijnSlices, imtype);
+					fillVolumeWithStack(ijXsize, ijYsize, ijnSlices, imtype, volume, localImageStack);
+					Variant vc = new Variant(ijCh-1);
+					Variant vt = new Variant(ijT-1);
+					Variant vdata = new Variant(volume);
+					localIDataSet.invoke("SetDataVolume", vdata, vc, vt);					
+					
+				} else {
+					if (ijbitdep == 24) {
+						IJ.showMessage("Error", "RGB images cannot be exported now, please use 8,16 or 32-bit images");
 						localImagePlus.unlock();
 						//localIDataSet.release();
+						localIDataSet.safeRelease();
 						localIDataSet = null;
 						return false;
 					}
-					((ImageProcessor)localObject1).flipVertical();
-					IJ.showProgress(i8, localImageStack.getSize() - 1);
-				}
+					IJ.showMessage("Error", "Unknown image type");
+					localImagePlus.unlock();
+					//localIDataSet.release();
+					localIDataSet.safeRelease();
+					localIDataSet = null;
+					return false;
+				}		
 			}
 			catch (Exception localException2) {
 				localException2.printStackTrace();
-				IJ.showMessage("Error", "Unknown Exception occured while transfer");
+				IJ.showMessage("Error", "Unknown Exception occured while stack transfer");
 				localImagePlus.unlock();
 				//localIDataSet.release();
+				localIDataSet.safeRelease();
 				localIDataSet = null;
 				return false;
 			}
 			localImagePlus.unlock();
 			//localIDataSet.release();
+			localIDataSet.safeRelease();
 			localIDataSet = null;
 			return true;
 		}
