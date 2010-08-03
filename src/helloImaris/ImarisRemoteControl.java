@@ -699,6 +699,9 @@ public class ImarisRemoteControl extends JFrame {
 		}
 	}
 	
+	/**
+	 * @author Kota Miura
+	 */
 	private void fillSliceWithStackSlice(int xSize, int ySize, int type, SafeArray slice, ImageProcessor ip) {
 
 		for (int x = 0; x < xSize; x++) {
@@ -740,10 +743,10 @@ public class ImarisRemoteControl extends JFrame {
 	//implementation of export button action
 	public boolean ExportDataSetToImaris(int paramInt1, int paramInt2, boolean paramBoolean) {
 		if (imarisApplication != null) {
-			int imCh = paramInt1;	//channel
-			int imT = paramInt2;	//time point
+			int ijCh = paramInt1;	//channel
+			int ijT = paramInt2;	//time point
  
-			boolean bool = paramBoolean;
+			boolean bool = paramBoolean;	//true if newly create a stack in Imaris. 
 			ImagePlus localImagePlus = IJ.getImage();
 			localImagePlus.lock();
 			if (localImagePlus == null) {
@@ -810,8 +813,8 @@ public class ImarisRemoteControl extends JFrame {
 	/* 1446 */				localIDataSet = null;
 	/* 1447 */				return false;
 	/*      */		}
-	/* 1451 */		imCh = 1;
-	/* 1452 */		imT = 1;
+	/* 1451 */		ijCh = 1;
+	/* 1452 */		ijT = 1;
 				//append objects to the current object already in Imaris	
 				//TODO: implement resize protocol. 
 	/*      */	} else { 
@@ -857,8 +860,9 @@ public class ImarisRemoteControl extends JFrame {
 	/* 1477 */			localIDataSet = null;
 	/* 1478 */			return false;
 					}
-					// check image size and resize 
+					// check image size and resize. Expand to fit larger of either IJimage or imImage. 
 					//TODO these resizing are too crude. should eliminate or fix. 
+					// e.g. resizing origin point is always (0, 0)
 	/* 1483 */		//if (((int)localUInt32.getValue() != xsize) || ((int)((UInt32)localObject1).getValue() != ysize) || ((int)((UInt32)localObject2).getValue() != nSlices))
 					if ((imXsize != ijXsize) 
 							|| (imYsize != ijYsize) 
@@ -876,7 +880,8 @@ public class ImarisRemoteControl extends JFrame {
 	/* 1492 */				//localImageStack = ((CanvasResizer)localObject6).expandStack(localImageStack, (int)localUInt32.getValue(), ysize, 0, 0);
 							localImageStack = ((CanvasResizer)localObject6).expandStack(localImageStack, imXsize, ijYsize, 0, 0);
 	/* 1493 */				//i1 = (int)localUInt32.getValue();
-							i1 = imXsize;
+							//i1 = imXsize;
+							ijXsize = imXsize;
 	/*      */			}
  
 	/* 1497 */			if (imYsize < ijYsize) {
@@ -889,8 +894,9 @@ public class ImarisRemoteControl extends JFrame {
 	/* 1502 */			else if (imYsize > ijYsize) {
 	/* 1503 */				localObject6 = new CanvasResizer();
 	/* 1504 */				//localImageStack = ((CanvasResizer)localObject6).expandStack(localImageStack, i1, (int)((UInt32)localObject1).getValue(), 0, 0);
-							localImageStack = ((CanvasResizer)localObject6).expandStack(localImageStack, i1, imYsize, 0, 0);
-	/* 1505 */				i3 = imYsize;//(int)((UInt32)localObject1).getValue();
+							localImageStack = ((CanvasResizer)localObject6).expandStack(localImageStack, ijXsize, imYsize, 0, 0);
+	/* 1505 */				//i3 = imYsize;//(int)((UInt32)localObject1).getValue();
+							ijYsize = imXsize;
 						}
 
 	/* 1509 */			if (imZsize < ijnSlices) {
@@ -900,15 +906,15 @@ public class ImarisRemoteControl extends JFrame {
 							resizepara[5] = new Variant(ijnSlices);
 							localIDataSet.invoke("Resize", resizepara);							
 	/* 1511 */				imZsize = ijnSlices;//((UInt32)localObject2).setValue(nSlices);
-							
 						}
+	
 	/* 1514 */			else if (imZsize > ijnSlices) {
 	/* 1516 */				if (ijbitdep == 8) {
-	/* 1517 */					localObject6 = new ByteProcessor(i1, i3);
+	/* 1517 */					localObject6 = new ByteProcessor(ijXsize, ijYsize);
 	/* 1518 */				} else if (ijbitdep == 16) {
-	/* 1519 */					localObject6 = new ShortProcessor(i1, i3);
+	/* 1519 */					localObject6 = new ShortProcessor(ijXsize, ijYsize);
 	/* 1520 */				} else if (ijbitdep == 32) {
-	/* 1521 */					localObject6 = new FloatProcessor(i1, i3);
+	/* 1521 */					localObject6 = new FloatProcessor(ijXsize, ijYsize);
 	/*      */				} else {
 	/* 1523 */                   localImagePlus.unlock();
 	/* 1524 */                   //localIDataSet.release();
@@ -920,30 +926,33 @@ public class ImarisRemoteControl extends JFrame {
 							for (int i11 = 0; i11 < imZsize - ijnSlices; ++i11) {
 	/* 1530 */					localImageStack.addSlice("", (ImageProcessor)localObject6);
 							}
-	/* 1532 */				i5 = imZsize;//(int)((UInt32)localObject2).getValue();
+	/* 1532 */				//i5 = imZsize;//(int)((UInt32)localObject2).getValue();
+							ijnSlices = imZsize;
 						}
 					}
 					//channel exceeds
 	/* 1538 */		//if (i > (int)((UInt32)localObject3).getValue()) {
-					if (imCh > imCsize) {
+					if (ijCh > imCsize) {
 	/* 1539 */			//localObject3 = new UInt32(((UInt32)localObject3).getValue() + 1L);
 						localObject3 = new Variant(imCsize + 1);
 	/* 1540 */			//i = (int)((UInt32)localObject3).getValue();
-						imCh = imCsize;
+						//ijCh = imCsize;
 	/* 1541 */			//localIDataSet.resize(new Int32(0), localUInt32, new Int32(0), (UInt32)localObject1, new Int32(0), (UInt32)localObject2, new Int32(0), new UInt32(i), new Int32(0), (UInt32)localObject4);
-						resizepara[7] = new Variant(imCh);
-						localIDataSet.invoke("Resize", resizepara);	
+						resizepara[7] = new Variant(ijCh);
+						localIDataSet.invoke("Resize", resizepara);
+						imCsize = ijCh;
 					}
 
 	/* 1544 */		//if (j > (int)((UInt32)localObject4).getValue()) {
-					if (imT > imTsize) {
+					if (ijT > imTsize) {
 	/* 1545 */			//localObject4 = new UInt32(((UInt32)localObject4).getValue() + 1L);
 						localObject4 = new Variant(imTsize + 1);
 	/* 1546 */			//j = (int)((UInt32)localObject4).getValue();
-						imT = imTsize;
+						//ijT = imTsize;
 	/* 1547 */			//localIDataSet.resize(new Int32(0), localUInt32, new Int32(0), (UInt32)localObject1, new Int32(0), (UInt32)localObject2, new Int32(0), (UInt32)localObject3, new Int32(0), new UInt32(j));
-						resizepara[9] = new Variant(imT);
-						localIDataSet.invoke("Resize", resizepara);	
+						resizepara[9] = new Variant(ijT);
+						localIDataSet.invoke("Resize", resizepara);
+						imTsize = ijT;
 					}
 				}
 	/* 1550 */	//localIDataSet.release();
@@ -963,10 +972,25 @@ public class ImarisRemoteControl extends JFrame {
 				//localIDataSet = this.mImaris.getMDataSet();
 				localIDataSet = imarisApplication.getPropertyAsComponent("mDataSet");
 				//localIDataSet.setAutoDelete(false);
-				for (int i8 = 0; i8 < i5; ++i8) {
+				for (int i8 = 0; i8 < ijnSlices; ++i8) {
 					localObject1 = localImageStack.getProcessor(i8 + 1);
 					((ImageProcessor)localObject1).flipVertical();
 					if ((ijbitdep == 8) || (ijbitdep == 16) || (ijbitdep == 32)){
+						int imtype = 0;
+						if (ijbitdep == 8) imtype = 1;
+						if (ijbitdep == 16) imtype = 2;
+						if (ijbitdep == 32) imtype = 3;
+						
+						SafeArray slice;
+						slice = createEmptySliceFor(ijXsize, ijYsize, imtype);
+						//fillSliceWithRandomValues(ijXsize, ijYsize, imtype, slice);
+						fillSliceWithStackSlice(ijXsize, ijYsize, imtype, slice, (ImageProcessor) localObject1);
+						Variant vz = new Variant(i8);
+						Variant vc = new Variant(ijCh);
+						Variant vt = new Variant(ijT);
+						Variant vdata = new Variant(slice);
+						localIDataSet.invoke("SetDataSlice", vdata, vz, vc, vt);						
+						
 //					if (k == 8) {
 //						localObject2 = (byte[])localImageStack.getPixels(i8 + 1);
 //						localObject3 = new SafeArrayBound[] { new SafeArrayBound(i1, 0), new SafeArrayBound(i3, 0) };
