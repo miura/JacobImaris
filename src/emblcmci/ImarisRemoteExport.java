@@ -52,8 +52,7 @@ import java.awt.Rectangle;
  * Modified "ImarisRemoteControl.java (by Volker Baeker, published in Bitplane website)" 
  * To export of stack in IJ could be exported to Imaris.
  *   
- * TODO To change the template for this generated type comment go to Window -
- * Preferences - Java - Code Style - Code Templates
+ * TODO 20100804 16bit does not work, so debug. 
  */
 
 @SuppressWarnings("serial")
@@ -106,8 +105,13 @@ public class ImarisRemoteExport extends JFrame {
 
 	private ActiveXComponent imarisApplication;
 
-	private JButton jButton = null;
+	private JButton exportZButton = null;
+	
+	private JButton exportZTButton = null;
 
+	private JButton exportCZButton = null;
+	
+	private JButton exportCZTButton = null;
 	/**
 	 * This is the default constructor
 	 */
@@ -150,7 +154,10 @@ public class ImarisRemoteExport extends JFrame {
 			jPanel.setLayout(null);
 			jPanel.add(getJPanel1(), null);
 			jPanel.add(getJPanel2(), null);
-			jPanel.add(getJButtonExport3Dstack(), null);
+			jPanel.add(getJButtonExportZstack(), null);
+			jPanel.add(getJButtonExportZTstack(), null);
+			jPanel.add(getJButtonExportCZstack(), null);
+			jPanel.add(getJButtonExportCZTstack(), null);
 		}
 		return jPanel;
 	}
@@ -459,17 +466,7 @@ public class ImarisRemoteExport extends JFrame {
 									.getPropertyAsComponent("mDataSet");
 							int type = dataSet.getPropertyAsInt("mType");
 							typeComboBox.setSelectedIndex(type);
-//							xTextField.setText(dataSet
-//									.getPropertyAsString("mSizeX"));
-//							yTextField.setText(dataSet
-//									.getPropertyAsString("mSizeY"));
-//							zTextField.setText(dataSet
-//									.getPropertyAsString("mSizeZ"));
-//							chTextField.setText(dataSet
-//									.getPropertyAsString("mSizeC"));
-//							tTextField.setText(dataSet
-//									.getPropertyAsString("mSizeT"));
-							//test 1 
+
 							xTextField.setText(dataSet
 									.getProperty("mSizeX").changeType(Variant.VariantString).getString());
 							yTextField.setText(dataSet
@@ -532,54 +529,133 @@ public class ImarisRemoteExport extends JFrame {
 	 * @return javax.swing.JButton	
 	 * @author Kota Miura
 	 */
-	private JButton getJButtonExport3Dstack() {
-		if (jButton == null) {
-			jButton = new JButton();
-			jButton.setBounds(new Rectangle(22, 284, 363, 26));
-			jButton.setText("Export Current Stack to Imaris");
-			jButton.addActionListener(new java.awt.event.ActionListener() {
+	private JButton getJButtonExportZstack() {
+		if (exportZButton == null) {
+			exportZButton = new JButton();
+			exportZButton.setBounds(new Rectangle(22, 284, 363, 26));
+			exportZButton.setText("Export Current Z Stack to Imaris");
+			exportZButton.addActionListener(new java.awt.event.ActionListener() {
 				public void actionPerformed(java.awt.event.ActionEvent e) {
 					//System.out.println("actionPerformed()"); 
 					ImagePlus imp = WindowManager.getCurrentImage();
-					if (imp.getNSlices() == 1) {
-						IJ.error("This stack does not have z-depth. Maybe set the image properties");
-					} else if (imp.getNFrames()== 1){ 
-							if (imp.getNChannels()== 1) 
-								ExportDataSetToImaris(1, 1, true);
-							else
-								IJ.error("Multichannel image not implemented");
-					} else {//Nslices > 1 and Nframes > 1		
-						if (! imp.isHyperStack())
-							IJ.error("Please conver the stack to Hyper Stack");
-						else {
-							if (imp.getNChannels()== 1) {
-								int startSlice = 0;
-								int endslice = 1;
-								for (int i = 0; i< imp.getNFrames(); i++){
-									//imp.setSlice(i * imp.getNSlices() + 1);
-									Duplicator dup = new Duplicator();
-									ImagePlus imp2 = dup.run(imp, (i * imp.getNSlices() + 1), ((i+1) * imp.getNSlices()));
-									//Extractfrom4D ext3D = new Extractfrom4D();
-									//ImagePlus imp3D = ext3D.core(imp, 3);
-									//imp3D.show();
-									if (i==0) 
-										ExportDataSetToImaris(1, i+1, true, imp2);
-									else
-										if (ExportDataSetToImaris(1, i+1, false, imp2)) 
-											IJ.log("Time Point " + Integer.toString(i+1)+ " exported.");
-									//imp3D.close();
-									//imp3D = null;
-								}
-								
-							} else
-								IJ.error("Multichannel image not implemented");
-						}
-					}	
+					if (imp.getStackSize()==1) IJ.error("This needs a stack");
+					else if (imp.getNSlices() == 1) 
+						IJ.error("This stack has no Z-depth. Maybe set the image properties");						
+					else if (imp.getNChannels()> 1)
+						IJ.error("This stack contains multiple channes. Export using CZ or CZT button");						
+					else if (imp.getNFrames()> 1) 
+						IJ.error("This stack contains multiple time frames. Export using ZT or CZT button");
+					else 	
+						ExportDataSetToImaris(1, 1, true);
 				}
 			});
 		}
-		return jButton;
+		return exportZButton;
 	}
+
+	private JButton getJButtonExportZTstack() {
+		if (exportZTButton == null) {
+			exportZTButton = new JButton();
+			exportZTButton.setBounds(new Rectangle(22, 324, 363, 26));
+			exportZTButton.setText("Export Current ZT Stack to Imaris");
+			exportZTButton.addActionListener(new java.awt.event.ActionListener() {
+				public void actionPerformed(java.awt.event.ActionEvent e) {
+					//System.out.println("actionPerformed()"); 
+					ImagePlus imp = WindowManager.getCurrentImage();
+					if (imp.getStackSize()==1) IJ.error("This needs a stack");
+					else if (imp.getNSlices() == 1) 
+						IJ.error("This stack has no Z-depth. Maybe set the image properties");						
+					else if (imp.getNChannels()> 1)
+						IJ.error("This stack contains multiple channes. Use CZ or CZT button");						
+					else if (imp.getNFrames()== 1) 
+						IJ.error("This stack has only 1 time frame. Use Z button");
+					else { 	
+						exportZT(imp, 0, true);		
+					} 		
+				}
+			});
+		}
+		return exportZTButton;
+	}
+	
+	private JButton getJButtonExportCZstack() {
+		if (exportCZButton == null) {
+			exportCZButton = new JButton();
+			exportCZButton.setBounds(new Rectangle(23, 364, 363, 26));
+			exportCZButton.setText("Export Current CZ Stack to Imaris");
+			exportCZButton.addActionListener(new java.awt.event.ActionListener() {
+				public void actionPerformed(java.awt.event.ActionEvent e) {
+					//System.out.println("actionPerformed()"); 
+					ImagePlus imp = WindowManager.getCurrentImage();
+					if (imp.getStackSize()==1) IJ.error("This needs a stack");
+					else if (imp.getNSlices() == 1) 
+						IJ.error("This stack has no Z-depth. Maybe set the image properties");						
+					else if (imp.getNChannels() == 1)
+						IJ.error("Stack should contain multiple channes. Use Z or ZT button");						
+					else if (imp.getNFrames()> 1) 
+						IJ.error("This stack time frames. Use CZT button");
+					else {
+						if (imp.getBitDepth() == 24) {	//RGB - Z
+							RGBHyperstackChannelSplitter RGBsplit = new RGBHyperstackChannelSplitter(imp);
+							RGBsplit.ChannelSplitter(imp);
+							ExportDataSetToImaris(1, 1, true, RGBsplit.impCh1);
+							ExportDataSetToImaris(2, 1, false, RGBsplit.impCh2);							
+							ExportDataSetToImaris(3, 1, false, RGBsplit.impCh3);							
+						} else { //CZ
+							GrayHyperStackSplitter splitter = new GrayHyperStackSplitter(imp);
+							for (int ch = 0; ch<imp.getNChannels(); ch++){
+								if (ch ==0)
+									ExportDataSetToImaris(ch+1, 1, true, splitter.extractZTfromCZT(imp, ch));
+								else
+									ExportDataSetToImaris(ch+1, 1, false, splitter.extractZTfromCZT(imp, ch));
+							}
+						}
+						
+					} 		
+				}
+			});
+		}
+		return exportCZButton;
+	}
+
+	private JButton getJButtonExportCZTstack() {
+		if (exportCZTButton == null) {
+			exportCZTButton = new JButton();
+			exportCZTButton.setBounds(new Rectangle(23, 404, 363, 26));
+			exportCZTButton.setText("Export Current CZT Stack to Imaris");
+			exportCZTButton.addActionListener(new java.awt.event.ActionListener() {
+				public void actionPerformed(java.awt.event.ActionEvent e) {
+					//System.out.println("actionPerformed()"); 
+					ImagePlus imp = WindowManager.getCurrentImage();
+					if (imp.getStackSize()==1) IJ.error("This needs a stack");
+					else if (imp.getNSlices() == 1) 
+						IJ.error("This stack has no Z-depth. Maybe set the image properties");						
+					else if (imp.getNChannels()== 1)
+						IJ.error("Stack should contains multiple channels. Use Z or ZT button");						
+					else if (imp.getNFrames()== 1) 
+						IJ.error("This stack has only 1 time frame. Use CZ button");
+					else {
+						if (imp.getBitDepth() == 24) {	//RGB - Z
+							RGBHyperstackChannelSplitter RGBsplit = new RGBHyperstackChannelSplitter(imp);
+							RGBsplit.ChannelSplitter(imp);
+							exportZT(RGBsplit.impCh1, 1, true);
+							exportZT(RGBsplit.impCh2, 2, false);
+							exportZT(RGBsplit.impCh3, 3, false);
+						} else { //CZ
+							GrayHyperStackSplitter splitter = new GrayHyperStackSplitter(imp);
+							for (int ch = 0; ch<imp.getNChannels(); ch++){
+								if (ch ==0)
+									exportZT(splitter.extractZTfromCZT(imp, ch), ch, true);
+								else
+									exportZT(splitter.extractZTfromCZT(imp, ch), ch, false);
+							}
+						}	
+					} 		
+				}
+			});
+		}
+		return exportCZTButton;
+	}	
 
 	public static void main(String[] args) {
 		ImarisRemoteExport view = new ImarisRemoteExport();
@@ -745,7 +821,11 @@ public class ImarisRemoteExport extends JFrame {
 	//modified bpImaris_Adaptor2 for use with JACOB-imaris by Volker. 
 	//implementation of export button action
 	//TODO Geometry (voxel size) should be controllable from ImageJ
-	//	--> for this, use set mExtendMinX, mExtendMaxX pair. 
+	//	--> for this, use set mExtendMinX, mExtendMaxX pair.
+	/**
+	 * @param paramInt1 : Channel number, starting with 1
+	 * @param paramInt2 : Time Point number, starting with 1
+	 */
 	public boolean ExportDataSetToImaris(int paramInt1, int paramInt2, boolean paramBoolean, 
 			ImagePlus localImagePlus) {
 		if (imarisApplication != null) {
@@ -1084,6 +1164,41 @@ public class ImarisRemoteExport extends JFrame {
 		}
 		return true;
 	}
+	
+	/** Exports xyzt stack to Imaris 
+	 * imp should not contain multiple channels.
+	 *  
+	 * @param imp: xyzt stack
+	 * @param Ch: ChannelNumber. Starts with 0
+	 */
+	public void exportZT(ImagePlus imp, int Ch, boolean isFirstChannel){
+		for (int i = 0; i< imp.getNFrames(); i++){
+			//Duplicator dup = new Duplicator();
+			//ImagePlus imp2 = dup.run(imp, (i * imp.getNSlices() + 1), ((i+1) * imp.getNSlices()));
+			ImagePlus imp2 = extractZfromZT(imp, i);
+			if (i==0) 
+				ExportDataSetToImaris(Ch + 1, i+1, isFirstChannel, imp2);
+			else
+				if (ExportDataSetToImaris(Ch + 1, i+1, false, imp2)) 
+					IJ.log("Time Point " + Integer.toString(i+1)+ " exported.");
+			imp2.flush();
+		}	
+	}
+	
+	/** 
+	 * imp: 4D xyzt sequence
+	 * t: time point starts with 0
+	*/ 
+	public ImagePlus extractZfromZT(ImagePlus imp, int t){
+		ImagePlus imp2 =null;
+		if (imp.getStackSize()>1) {
+			Duplicator dup = new Duplicator();
+			imp2 = dup.run(imp, (t * imp.getNSlices() * imp.getNChannels() + 1), ((t+1) * imp.getNSlices()* imp.getNChannels()));
+		}
+		return imp2;
+	}
+	
+	
 
 
 	
