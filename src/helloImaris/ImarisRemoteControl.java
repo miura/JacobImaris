@@ -11,6 +11,10 @@
  * contact:
  * 	volker.baecker@mri.cnrs.fr
  *  	pierre.travo@mri.cnrs.fr
+ * -------
+ * 04.08.2010  
+ * Kota Miura@EMBL: bug fixed for getGetsize and setRandomIntensities, on Variant class type handling
+ * 
  */
 
 package helloImaris;
@@ -31,7 +35,7 @@ import javax.swing.JComboBox;
 import javax.swing.JLabel;
 /**
  * @author Volker
- * bug fixed by Kota Miura
+ * 
  * TODO To change the template for this generated type comment go to Window -
  * Preferences - Java - Code Style - Code Templates
  */
