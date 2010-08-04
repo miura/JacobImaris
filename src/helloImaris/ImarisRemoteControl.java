@@ -31,7 +31,7 @@ import javax.swing.JComboBox;
 import javax.swing.JLabel;
 /**
  * @author Volker
- * 
+ * bug fixed by Kota Miura
  * TODO To change the template for this generated type comment go to Window -
  * Preferences - Java - Code Style - Code Templates
  */
@@ -485,16 +485,26 @@ public class ImarisRemoteControl extends JFrame {
 									.getPropertyAsComponent("mDataSet");
 							int type = dataSet.getPropertyAsInt("mType");
 							typeComboBox.setSelectedIndex(type);
+//							xTextField.setText(dataSet
+//									.getPropertyAsString("mSizeX"));
+//							yTextField.setText(dataSet
+//									.getPropertyAsString("mSizeY"));
+//							zTextField.setText(dataSet
+//									.getPropertyAsString("mSizeZ"));
+//							chTextField.setText(dataSet
+//									.getPropertyAsString("mSizeC"));
+//							tTextField.setText(dataSet
+//									.getPropertyAsString("mSizeT"));
 							xTextField.setText(dataSet
-									.getPropertyAsString("mSizeX"));
+									.getProperty("mSizeX").changeType(Variant.VariantString).getString());
 							yTextField.setText(dataSet
-									.getPropertyAsString("mSizeY"));
+									.getProperty("mSizeY").changeType(Variant.VariantString).getString());
 							zTextField.setText(dataSet
-									.getPropertyAsString("mSizeZ"));
+									.getProperty("mSizeZ").changeType(Variant.VariantString).getString());
 							chTextField.setText(dataSet
-									.getPropertyAsString("mSizeC"));
+									.getProperty("mSizeC").changeType(Variant.VariantString).getString());
 							tTextField.setText(dataSet
-									.getPropertyAsString("mSizeT"));
+									.getProperty("mSizeT").changeType(Variant.VariantString).getString());							
 						}
 					});
 		}
@@ -589,12 +599,18 @@ public class ImarisRemoteControl extends JFrame {
 	private void setRandomIntensities() {
 		ActiveXComponent dataSet = imarisApplication
 				.getPropertyAsComponent("mDataSet");
-		int xSize = dataSet.getPropertyAsInt("mSizeX");
-		int ySize = dataSet.getPropertyAsInt("mSizeY");
-		int zSize = dataSet.getPropertyAsInt("mSizeZ");
-		int chSize = dataSet.getPropertyAsInt("mSizeC");
-		int tSize = dataSet.getPropertyAsInt("mSizeT");
-		int type = dataSet.getPropertyAsInt("mType");
+//		int xSize = dataSet.getPropertyAsInt("mSizeX");
+//		int ySize = dataSet.getPropertyAsInt("mSizeY");
+//		int zSize = dataSet.getPropertyAsInt("mSizeZ");
+//		int chSize = dataSet.getPropertyAsInt("mSizeC");
+//		int tSize = dataSet.getPropertyAsInt("mSizeT");
+//		int type = dataSet.getPropertyAsInt("mType");
+		int xSize = dataSet.getProperty("mSizeX").changeType(Variant.VariantInt).getInt();
+		int ySize = dataSet.getProperty("mSizeY").changeType(Variant.VariantInt).getInt();
+		int zSize = dataSet.getProperty("mSizeZ").changeType(Variant.VariantInt).getInt();
+		int chSize = dataSet.getProperty("mSizeC").changeType(Variant.VariantInt).getInt();
+		int tSize = dataSet.getProperty("mSizeT").changeType(Variant.VariantInt).getInt();
+		int type =  dataSet.getProperty("mType").changeType(Variant.VariantInt).getInt();		
 		for (int z = 0; z < zSize; z++) {
 			for (int c = 0; c < chSize; c++) {
 				for (int t = 0; t < tSize; t++) {
