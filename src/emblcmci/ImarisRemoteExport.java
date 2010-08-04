@@ -68,11 +68,7 @@ public class ImarisRemoteExport extends JFrame {
 
 	private JTextField imagePath1TextField = null;
 
-	private JTextField imagePath2TextField = null;
-
 	private JButton loadImage1Button = null;
-
-	private JButton loadImage2Button = null;
 
 	private JButton exitImarisButton = null;
 
@@ -107,10 +103,6 @@ public class ImarisRemoteExport extends JFrame {
 	private JButton getSizeButton = null;
 
 	private JButton setSizeButton = null;
-
-	private JPanel jPanel3 = null;
-
-	private JButton setRandomVoxelIntensitiesButton = null;
 
 	private ActiveXComponent imarisApplication;
 
@@ -158,7 +150,6 @@ public class ImarisRemoteExport extends JFrame {
 			jPanel.setLayout(null);
 			jPanel.add(getJPanel1(), null);
 			jPanel.add(getJPanel2(), null);
-			jPanel.add(getJPanel3(), null);
 			jPanel.add(getJButtonExport3Dstack(), null);
 		}
 		return jPanel;
@@ -173,7 +164,7 @@ public class ImarisRemoteExport extends JFrame {
 		if (jPanel1 == null) {
 			jPanel1 = new JPanel();
 			jPanel1.setLayout(null);
-			jPanel1.setBounds(11, 8, 400, 194);
+			jPanel1.setBounds(11, 8, 400, 146);
 			jPanel1.setBorder(javax.swing.BorderFactory.createTitledBorder(
 					null, "Application",
 					javax.swing.border.TitledBorder.DEFAULT_JUSTIFICATION,
@@ -181,11 +172,9 @@ public class ImarisRemoteExport extends JFrame {
 					null));
 			jPanel1.add(getStartImarisButton(), null);
 			jPanel1.add(getImagePath1TextField(), null);
-			jPanel1.add(getImagePath2TextField(), null);
 			jPanel1.add(getExitImarisButton(), null);
 			jPanel1.add(getCheckbox(), null);
 			jPanel1.add(getLoadImage1Button(), null);
-			jPanel1.add(getLoadImage2Button(), null);
 		}
 		return jPanel1;
 	}
@@ -232,21 +221,6 @@ public class ImarisRemoteExport extends JFrame {
 	}
 
 	/**
-	 * This method initializes imagePath2TextField
-	 * 
-	 * @return javax.swing.JTextField
-	 */
-	private JTextField getImagePath2TextField() {
-		if (imagePath2TextField == null) {
-			imagePath2TextField = new JTextField();
-			imagePath2TextField.setBounds(16, 87, 276, 20);
-			imagePath2TextField
-					.setText("c:\\program files\\bitplane\\imaris 4\\images\\R18Demo.ims");
-		}
-		return imagePath2TextField;
-	}
-
-	/**
 	 * This method initializes loadImage1Button
 	 * 
 	 * @return javax.swing.JButton
@@ -275,34 +249,6 @@ public class ImarisRemoteExport extends JFrame {
 	}
 
 	/**
-	 * This method initializes loadImage2Button
-	 * 
-	 * @return javax.swing.JButton
-	 */
-	private JButton getLoadImage2Button() {
-		if (loadImage2Button == null) {
-			loadImage2Button = new JButton();
-			loadImage2Button.setBounds(305, 87, 76, 20);
-			loadImage2Button.setText("Load");
-			loadImage2Button.setBorder(javax.swing.BorderFactory
-					.createBevelBorder(javax.swing.border.BevelBorder.RAISED));
-			loadImage2Button
-					.addActionListener(new java.awt.event.ActionListener() {
-						public void actionPerformed(java.awt.event.ActionEvent e) {
-							if (imarisApplication != null) {
-								Variant parameter1 = new Variant(
-										imagePath2TextField.getText());
-								Variant parameter2 = new Variant("");
-								imarisApplication.invoke("FileOpen",
-										parameter1, parameter2);
-							}
-						}
-					});
-		}
-		return loadImage2Button;
-	}
-
-	/**
 	 * This method initializes exitImarisButton
 	 * 
 	 * @return javax.swing.JButton
@@ -310,7 +256,7 @@ public class ImarisRemoteExport extends JFrame {
 	private JButton getExitImarisButton() {
 		if (exitImarisButton == null) {
 			exitImarisButton = new JButton();
-			exitImarisButton.setBounds(17, 124, 364, 20);
+			exitImarisButton.setBounds(15, 89, 364, 20);
 			exitImarisButton.setBorder(javax.swing.BorderFactory
 					.createBevelBorder(javax.swing.border.BevelBorder.RAISED));
 			exitImarisButton.setText("Exit Imaris");
@@ -336,7 +282,7 @@ public class ImarisRemoteExport extends JFrame {
 		if (checkbox == null) {
 			checkbox = new Checkbox();
 			checkbox.setLabel("Exit Imaris when closing this Dialog");
-			checkbox.setBounds(17, 154, 243, 23);
+			checkbox.setBounds(14, 119, 243, 23);
 			checkbox.setState(true);
 			checkbox.addItemListener(new java.awt.event.ItemListener() {
 				public void itemStateChanged(java.awt.event.ItemEvent e) {
@@ -365,32 +311,32 @@ public class ImarisRemoteExport extends JFrame {
 			jLabel4 = new JLabel();
 			jLabel5 = new JLabel();
 			jPanel2.setLayout(null);
-			jPanel2.setBounds(11, 210, 400, 226);
+			jPanel2.setBounds(11, 158, 400, 98);
 			jPanel2.setBorder(javax.swing.BorderFactory.createTitledBorder(
 					null, "DataSet Size",
 					javax.swing.border.TitledBorder.DEFAULT_JUSTIFICATION,
 					javax.swing.border.TitledBorder.DEFAULT_POSITION, null,
 					null));
-			jLabel.setBounds(82, 15, 44, 16);
+			jLabel.setBounds(15, 17, 44, 16);
 			jLabel.setText("Type");
 			jLabel.setHorizontalAlignment(javax.swing.SwingConstants.RIGHT);
-			jLabel1.setBounds(82, 50, 44, 16);
+			jLabel1.setBounds(21, 70, 20, 16);
 			jLabel1.setText("X");
 			jLabel1.setHorizontalTextPosition(javax.swing.SwingConstants.RIGHT);
 			jLabel1.setHorizontalAlignment(javax.swing.SwingConstants.TRAILING);
-			jLabel2.setBounds(82, 85, 44, 16);
+			jLabel2.setBounds(74, 69, 20, 16);
 			jLabel2.setText("Y");
 			jLabel2.setHorizontalAlignment(javax.swing.SwingConstants.TRAILING);
 			jLabel2.setHorizontalTextPosition(javax.swing.SwingConstants.RIGHT);
-			jLabel3.setBounds(82, 120, 44, 16);
+			jLabel3.setBounds(124, 70, 20, 16);
 			jLabel3.setText("Z");
 			jLabel3.setHorizontalAlignment(javax.swing.SwingConstants.TRAILING);
 			jLabel3.setHorizontalTextPosition(javax.swing.SwingConstants.RIGHT);
-			jLabel4.setBounds(82, 155, 44, 16);
+			jLabel4.setBounds(175, 70, 20, 16);
 			jLabel4.setText("Ch");
 			jLabel4.setHorizontalAlignment(javax.swing.SwingConstants.TRAILING);
 			jLabel4.setHorizontalTextPosition(javax.swing.SwingConstants.RIGHT);
-			jLabel5.setBounds(82, 190, 44, 16);
+			jLabel5.setBounds(225, 70, 20, 16);
 			jLabel5.setText("T");
 			jLabel5.setHorizontalAlignment(javax.swing.SwingConstants.TRAILING);
 			jLabel5.setHorizontalTextPosition(javax.swing.SwingConstants.RIGHT);
@@ -437,7 +383,7 @@ public class ImarisRemoteExport extends JFrame {
 	private JTextField getXTextField() {
 		if (xTextField == null) {
 			xTextField = new JTextField();
-			xTextField.setBounds(132, 47, 121, 23);
+			xTextField.setBounds(14, 40, 45, 23);
 		}
 		return xTextField;
 	}
@@ -450,7 +396,7 @@ public class ImarisRemoteExport extends JFrame {
 	private JTextField getYTextField() {
 		if (yTextField == null) {
 			yTextField = new JTextField();
-			yTextField.setBounds(132, 82, 121, 23);
+			yTextField.setBounds(65, 40, 45, 23);
 		}
 		return yTextField;
 	}
@@ -463,7 +409,7 @@ public class ImarisRemoteExport extends JFrame {
 	private JTextField getZTextField() {
 		if (zTextField == null) {
 			zTextField = new JTextField();
-			zTextField.setBounds(132, 117, 121, 23);
+			zTextField.setBounds(114, 40, 45, 23);
 		}
 		return zTextField;
 	}
@@ -476,7 +422,7 @@ public class ImarisRemoteExport extends JFrame {
 	private JTextField getChTextField() {
 		if (chTextField == null) {
 			chTextField = new JTextField();
-			chTextField.setBounds(132, 152, 121, 23);
+			chTextField.setBounds(162, 40, 45, 23);
 		}
 		return chTextField;
 	}
@@ -489,7 +435,7 @@ public class ImarisRemoteExport extends JFrame {
 	private JTextField getTTextField() {
 		if (tTextField == null) {
 			tTextField = new JTextField();
-			tTextField.setBounds(132, 187, 121, 23);
+			tTextField.setBounds(211, 40, 45, 23);
 		}
 		return tTextField;
 	}
@@ -502,7 +448,7 @@ public class ImarisRemoteExport extends JFrame {
 	private JButton getGetSizeButton() {
 		if (getSizeButton == null) {
 			getSizeButton = new JButton();
-			getSizeButton.setBounds(299, 13, 93, 20);
+			getSizeButton.setBounds(322, 17, 68, 20);
 			getSizeButton.setText("Get Size");
 			getSizeButton.setBorder(javax.swing.BorderFactory
 					.createBevelBorder(javax.swing.border.BevelBorder.RAISED));
@@ -551,7 +497,7 @@ public class ImarisRemoteExport extends JFrame {
 	private JButton getSetSizeButton() {
 		if (setSizeButton == null) {
 			setSizeButton = new JButton();
-			setSizeButton.setBounds(299, 48, 93, 20);
+			setSizeButton.setBounds(323, 48, 69, 20);
 			setSizeButton.setText("Set Size");
 			setSizeButton.setBorder(javax.swing.BorderFactory
 					.createBevelBorder(javax.swing.border.BevelBorder.RAISED));
@@ -581,49 +527,6 @@ public class ImarisRemoteExport extends JFrame {
 	}
 
 	/**
-	 * This method initializes jPanel3
-	 * 
-	 * @return javax.swing.JPanel
-	 */
-	private JPanel getJPanel3() {
-		if (jPanel3 == null) {
-			jPanel3 = new JPanel();
-			jPanel3.setLayout(null);
-			jPanel3.setBounds(11, 444, 400, 54);
-			jPanel3.setBorder(javax.swing.BorderFactory.createTitledBorder(
-					null, "DataSet Content",
-					javax.swing.border.TitledBorder.DEFAULT_JUSTIFICATION,
-					javax.swing.border.TitledBorder.DEFAULT_POSITION, null,
-					null));
-			jPanel3.add(getSetRandomVoxelIntensitiesButton(), null);
-		}
-		return jPanel3;
-	}
-
-	/**
-	 * This method initializes setRandomVoxelIntensitiesButton
-	 * 
-	 * @return javax.swing.JButton
-	 */
-	private JButton getSetRandomVoxelIntensitiesButton() {
-		if (setRandomVoxelIntensitiesButton == null) {
-			setRandomVoxelIntensitiesButton = new JButton();
-			setRandomVoxelIntensitiesButton.setBounds(19, 21, 364, 20);
-			setRandomVoxelIntensitiesButton
-					.setText("Set Random Voxel Intensities");
-			setRandomVoxelIntensitiesButton.setBorder(javax.swing.BorderFactory
-					.createBevelBorder(javax.swing.border.BevelBorder.RAISED));
-			setRandomVoxelIntensitiesButton
-					.addActionListener(new java.awt.event.ActionListener() {
-						public void actionPerformed(java.awt.event.ActionEvent e) {
-							setRandomIntensities();
-						}
-					});
-		}
-		return setRandomVoxelIntensitiesButton;
-	}
-
-	/**
 	 * This method initializes jButton	
 	 * 	
 	 * @return javax.swing.JButton	
@@ -632,7 +535,7 @@ public class ImarisRemoteExport extends JFrame {
 	private JButton getJButtonExport3Dstack() {
 		if (jButton == null) {
 			jButton = new JButton();
-			jButton.setBounds(new Rectangle(33, 510, 363, 26));
+			jButton.setBounds(new Rectangle(22, 284, 363, 26));
 			jButton.setText("Export Current Stack to Imaris");
 			jButton.addActionListener(new java.awt.event.ActionListener() {
 				public void actionPerformed(java.awt.event.ActionEvent e) {
@@ -693,14 +596,7 @@ public class ImarisRemoteExport extends JFrame {
 		int chSize = dataSet.getProperty("mSizeC").changeType(Variant.VariantInt).getInt();
 		int tSize = dataSet.getProperty("mSizeT").changeType(Variant.VariantInt).getInt();
 		int type =  dataSet.getProperty("mType").changeType(Variant.VariantInt).getInt();
-		
-//		int xSize = (int) dataSet.getProperty("mSizeX").changeType(Variant.VariantLongInt).getLong();
-//		int ySize = (int) dataSet.getProperty("mSizeY").changeType(Variant.VariantLongInt).getLong();
-//		int zSize = (int) dataSet.getProperty("mSizeZ").changeType(Variant.VariantLongInt).getLong();
-//		int chSize = (int) dataSet.getProperty("mSizeC").changeType(Variant.VariantLongInt).getLong();
-//		int tSize = (int) dataSet.getProperty("mSizeT").changeType(Variant.VariantLongInt).getLong();
-//		int type = (int) dataSet.getProperty("mType").changeType(Variant.VariantLongInt).getLong();
-		
+			
 		//int type = dataSet.getPropertyAsInt("mType");
 
 		for (int z = 0; z < zSize; z++) {
