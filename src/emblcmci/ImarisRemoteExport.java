@@ -77,32 +77,6 @@ public class ImarisRemoteExport extends JFrame {
 
 	private JComboBox typeComboBox = null;
 
-	private JTextField xTextField = null;
-
-	private JTextField yTextField = null;
-
-	private JTextField zTextField = null;
-
-	private JTextField chTextField = null;
-
-	private JTextField tTextField = null;
-
-	private JLabel jLabel = null;
-
-	private JLabel jLabel1 = null;
-
-	private JLabel jLabel2 = null;
-
-	private JLabel jLabel3 = null;
-
-	private JLabel jLabel4 = null;
-
-	private JLabel jLabel5 = null;
-
-	private JButton getSizeButton = null;
-
-	private JButton setSizeButton = null;
-
 	private ActiveXComponent imarisApplication;
 
 	private JButton exportZButton = null;
@@ -129,7 +103,7 @@ public class ImarisRemoteExport extends JFrame {
 		this
 				.setDefaultCloseOperation(javax.swing.WindowConstants.DISPOSE_ON_CLOSE);
 		this.setContentPane(getJPanel());
-		this.setSize(440, 577);
+		this.setSize(440, 296);
 		this.setTitle("Imaris interface");
 		this.addWindowListener(new java.awt.event.WindowAdapter() {
 			public void windowClosing(java.awt.event.WindowEvent e) {
@@ -154,10 +128,7 @@ public class ImarisRemoteExport extends JFrame {
 			jPanel.setLayout(null);
 			jPanel.add(getJPanel1(), null);
 			jPanel.add(getJPanel2(), null);
-			jPanel.add(getJButtonExportZstack(), null);
-			jPanel.add(getJButtonExportZTstack(), null);
-			jPanel.add(getJButtonExportCZstack(), null);
-			jPanel.add(getJButtonExportCZTstack(), null);
+			//jPanel.add(getJButtonExportZstack(), null);
 		}
 		return jPanel;
 	}
@@ -302,6 +273,8 @@ public class ImarisRemoteExport extends JFrame {
 		}
 		return checkbox;
 	}
+
+			
 
 	/**
 	 * This method initializes jPanel2
@@ -311,56 +284,17 @@ public class ImarisRemoteExport extends JFrame {
 	private JPanel getJPanel2() {
 		if (jPanel2 == null) {
 			jPanel2 = new JPanel();
-			jLabel = new JLabel();
-			jLabel1 = new JLabel();
-			jLabel2 = new JLabel();
-			jLabel3 = new JLabel();
-			jLabel4 = new JLabel();
-			jLabel5 = new JLabel();
 			jPanel2.setLayout(null);
 			jPanel2.setBounds(11, 158, 400, 98);
 			jPanel2.setBorder(javax.swing.BorderFactory.createTitledBorder(
-					null, "DataSet Size",
+					null, "Stack Export to Imaris",
 					javax.swing.border.TitledBorder.DEFAULT_JUSTIFICATION,
 					javax.swing.border.TitledBorder.DEFAULT_POSITION, null,
 					null));
-			jLabel.setBounds(15, 17, 44, 16);
-			jLabel.setText("Type");
-			jLabel.setHorizontalAlignment(javax.swing.SwingConstants.RIGHT);
-			jLabel1.setBounds(21, 70, 20, 16);
-			jLabel1.setText("X");
-			jLabel1.setHorizontalTextPosition(javax.swing.SwingConstants.RIGHT);
-			jLabel1.setHorizontalAlignment(javax.swing.SwingConstants.TRAILING);
-			jLabel2.setBounds(74, 69, 20, 16);
-			jLabel2.setText("Y");
-			jLabel2.setHorizontalAlignment(javax.swing.SwingConstants.TRAILING);
-			jLabel2.setHorizontalTextPosition(javax.swing.SwingConstants.RIGHT);
-			jLabel3.setBounds(124, 70, 20, 16);
-			jLabel3.setText("Z");
-			jLabel3.setHorizontalAlignment(javax.swing.SwingConstants.TRAILING);
-			jLabel3.setHorizontalTextPosition(javax.swing.SwingConstants.RIGHT);
-			jLabel4.setBounds(175, 70, 20, 16);
-			jLabel4.setText("Ch");
-			jLabel4.setHorizontalAlignment(javax.swing.SwingConstants.TRAILING);
-			jLabel4.setHorizontalTextPosition(javax.swing.SwingConstants.RIGHT);
-			jLabel5.setBounds(225, 70, 20, 16);
-			jLabel5.setText("T");
-			jLabel5.setHorizontalAlignment(javax.swing.SwingConstants.TRAILING);
-			jLabel5.setHorizontalTextPosition(javax.swing.SwingConstants.RIGHT);
-			jPanel2.add(getTypeComboBox(), null);
-			jPanel2.add(getXTextField(), null);
-			jPanel2.add(getYTextField(), null);
-			jPanel2.add(getZTextField(), null);
-			jPanel2.add(getChTextField(), null);
-			jPanel2.add(getTTextField(), null);
-			jPanel2.add(jLabel, null);
-			jPanel2.add(jLabel1, null);
-			jPanel2.add(jLabel2, null);
-			jPanel2.add(jLabel3, null);
-			jPanel2.add(jLabel4, null);
-			jPanel2.add(jLabel5, null);
-			jPanel2.add(getGetSizeButton(), null);
-			jPanel2.add(getSetSizeButton(), null);
+			jPanel2.add(getJButtonExportZstack(), null);
+			jPanel2.add(getJButtonExportZTstack(), null);
+			jPanel2.add(getJButtonExportCZstack(), null);
+			jPanel2.add(getJButtonExportCZTstack(), null);
 		}
 		return jPanel2;
 	}
@@ -383,147 +317,6 @@ public class ImarisRemoteExport extends JFrame {
 	}
 
 	/**
-	 * This method initializes xTextField
-	 * 
-	 * @return javax.swing.JTextField
-	 */
-	private JTextField getXTextField() {
-		if (xTextField == null) {
-			xTextField = new JTextField();
-			xTextField.setBounds(14, 40, 45, 23);
-		}
-		return xTextField;
-	}
-
-	/**
-	 * This method initializes yTextField
-	 * 
-	 * @return javax.swing.JTextField
-	 */
-	private JTextField getYTextField() {
-		if (yTextField == null) {
-			yTextField = new JTextField();
-			yTextField.setBounds(65, 40, 45, 23);
-		}
-		return yTextField;
-	}
-
-	/**
-	 * This method initializes zTextField
-	 * 
-	 * @return javax.swing.JTextField
-	 */
-	private JTextField getZTextField() {
-		if (zTextField == null) {
-			zTextField = new JTextField();
-			zTextField.setBounds(114, 40, 45, 23);
-		}
-		return zTextField;
-	}
-
-	/**
-	 * This method initializes chTextField
-	 * 
-	 * @return javax.swing.JTextField
-	 */
-	private JTextField getChTextField() {
-		if (chTextField == null) {
-			chTextField = new JTextField();
-			chTextField.setBounds(162, 40, 45, 23);
-		}
-		return chTextField;
-	}
-
-	/**
-	 * This method initializes tTextField
-	 * 
-	 * @return javax.swing.JTextField
-	 */
-	private JTextField getTTextField() {
-		if (tTextField == null) {
-			tTextField = new JTextField();
-			tTextField.setBounds(211, 40, 45, 23);
-		}
-		return tTextField;
-	}
-
-	/**
-	 * This method initializes getSizeButton
-	 * 
-	 * @return javax.swing.JButton
-	 */
-	private JButton getGetSizeButton() {
-		if (getSizeButton == null) {
-			getSizeButton = new JButton();
-			getSizeButton.setBounds(322, 17, 68, 20);
-			getSizeButton.setText("Get Size");
-			getSizeButton.setBorder(javax.swing.BorderFactory
-					.createBevelBorder(javax.swing.border.BevelBorder.RAISED));
-			getSizeButton
-					.addActionListener(new java.awt.event.ActionListener() {
-						public void actionPerformed(java.awt.event.ActionEvent e) {
-							ActiveXComponent dataSet = imarisApplication
-									.getPropertyAsComponent("mDataSet");
-							int type = dataSet.getPropertyAsInt("mType");
-							typeComboBox.setSelectedIndex(type);
-
-							xTextField.setText(dataSet
-									.getProperty("mSizeX").changeType(Variant.VariantString).getString());
-							yTextField.setText(dataSet
-									.getProperty("mSizeY").changeType(Variant.VariantString).getString());
-							zTextField.setText(dataSet
-									.getProperty("mSizeZ").changeType(Variant.VariantString).getString());
-							chTextField.setText(dataSet
-									.getProperty("mSizeC").changeType(Variant.VariantString).getString());
-							tTextField.setText(dataSet
-									.getProperty("mSizeT").changeType(Variant.VariantString).getString());
-							//System.out.println(dataSet.getProperty("mSizeX").changeType(Variant.VariantString));
-							//System.out.println("bitdepth " + type);
-							
-						}
-					});
-		}
-		return getSizeButton;
-	}
-
-	/**
-	 * This method initializes setSizeButton
-	 * 
-	 * @return javax.swing.JButton
-	 */
-	private JButton getSetSizeButton() {
-		if (setSizeButton == null) {
-			setSizeButton = new JButton();
-			setSizeButton.setBounds(323, 48, 69, 20);
-			setSizeButton.setText("Set Size");
-			setSizeButton.setBorder(javax.swing.BorderFactory
-					.createBevelBorder(javax.swing.border.BevelBorder.RAISED));
-			setSizeButton
-					.addActionListener(new java.awt.event.ActionListener() {
-						public void actionPerformed(java.awt.event.ActionEvent e) {
-							ActiveXComponent dataSet = imarisApplication
-									.getPropertyAsComponent("mDataSet");
-							Variant[] parameter = new Variant[6];
-							parameter[0] = new Variant(typeComboBox
-									.getSelectedIndex());
-							parameter[1] = new Variant(Integer.valueOf(
-									xTextField.getText()).intValue());
-							parameter[2] = new Variant(Integer.valueOf(
-									yTextField.getText()).intValue());
-							parameter[3] = new Variant(Integer.valueOf(
-									zTextField.getText()).intValue());
-							parameter[4] = new Variant(Integer.valueOf(
-									chTextField.getText()).intValue());
-							parameter[5] = new Variant(Integer.valueOf(
-									tTextField.getText()).intValue());
-							dataSet.invoke("Create", parameter);
-						}
-					});
-		}
-		return setSizeButton;
-	}
-
-	/**
 	 * This method initializes jButton	
 	 * 	
 	 * @return javax.swing.JButton	
@@ -532,8 +325,8 @@ public class ImarisRemoteExport extends JFrame {
 	private JButton getJButtonExportZstack() {
 		if (exportZButton == null) {
 			exportZButton = new JButton();
-			exportZButton.setBounds(new Rectangle(22, 284, 363, 26));
-			exportZButton.setText("Export Current Z Stack to Imaris");
+			exportZButton.setText("Z Stack");
+			exportZButton.setBounds(new Rectangle(15, 25, 165, 26));
 			exportZButton.addActionListener(new java.awt.event.ActionListener() {
 				public void actionPerformed(java.awt.event.ActionEvent e) {
 					//System.out.println("actionPerformed()"); 
@@ -556,8 +349,8 @@ public class ImarisRemoteExport extends JFrame {
 	private JButton getJButtonExportZTstack() {
 		if (exportZTButton == null) {
 			exportZTButton = new JButton();
-			exportZTButton.setBounds(new Rectangle(22, 324, 363, 26));
-			exportZTButton.setText("Export Current ZT Stack to Imaris");
+			exportZTButton.setText("ZT Stack");
+			exportZTButton.setBounds(new Rectangle(15, 60, 165, 26));
 			exportZTButton.addActionListener(new java.awt.event.ActionListener() {
 				public void actionPerformed(java.awt.event.ActionEvent e) {
 					//System.out.println("actionPerformed()"); 
@@ -581,36 +374,42 @@ public class ImarisRemoteExport extends JFrame {
 	private JButton getJButtonExportCZstack() {
 		if (exportCZButton == null) {
 			exportCZButton = new JButton();
-			exportCZButton.setBounds(new Rectangle(23, 364, 363, 26));
-			exportCZButton.setText("Export Current CZ Stack to Imaris");
+			exportCZButton.setText("CZ stack");
+			exportCZButton.setBounds(new Rectangle(226, 25, 165, 26));
 			exportCZButton.addActionListener(new java.awt.event.ActionListener() {
 				public void actionPerformed(java.awt.event.ActionEvent e) {
 					//System.out.println("actionPerformed()"); 
 					ImagePlus imp = WindowManager.getCurrentImage();
-					if (imp.getStackSize()==1) IJ.error("This needs a stack");
-					else if (imp.getNSlices() == 1) 
-						IJ.error("This stack has no Z-depth. Maybe set the image properties");						
-					else if (imp.getNChannels() == 1)
-						IJ.error("Stack should contain multiple channes. Use Z or ZT button");						
-					else if (imp.getNFrames()> 1) 
-						IJ.error("This stack time frames. Use CZT button");
+					if (imp.getStackSize()==1) 
+						IJ.error("This needs a stack");
 					else {
-						if (imp.getBitDepth() == 24) {	//RGB - Z
-							RGBHyperstackChannelSplitter RGBsplit = new RGBHyperstackChannelSplitter(imp);
-							RGBsplit.ChannelSplitter(imp);
-							ExportDataSetToImaris(1, 1, true, RGBsplit.impCh1);
-							ExportDataSetToImaris(2, 1, false, RGBsplit.impCh2);							
-							ExportDataSetToImaris(3, 1, false, RGBsplit.impCh3);							
-						} else { //CZ
-							GrayHyperStackSplitter splitter = new GrayHyperStackSplitter(imp);
-							for (int ch = 0; ch<imp.getNChannels(); ch++){
-								if (ch ==0)
-									ExportDataSetToImaris(ch+1, 1, true, splitter.extractZTfromCZT(imp, ch));
-								else
-									ExportDataSetToImaris(ch+1, 1, false, splitter.extractZTfromCZT(imp, ch));
+						if (imp.getNSlices() == 1)  
+							IJ.error("This stack has no Z-depth. Maybe set the image properties");						
+						else {
+							if (imp.getNChannels() == 1)
+								IJ.error("Stack should contain multiple channes. Use Z or ZT button");						
+							else { 
+								if (imp.getNFrames()> 1) 
+									IJ.error("This stack time frames. Use CZT button");
+								else {
+									if (imp.getBitDepth() == 24) {	//RGB - Z
+										RGBHyperstackChannelSplitter RGBsplit = new RGBHyperstackChannelSplitter(imp);
+										RGBsplit.ChannelSplitter(imp);
+										ExportDataSetToImaris(1, 1, true, RGBsplit.impCh1);
+										ExportDataSetToImaris(2, 1, false, RGBsplit.impCh2);							
+										ExportDataSetToImaris(3, 1, false, RGBsplit.impCh3);							
+									} else { //CZ
+										GrayHyperStackSplitter splitter = new GrayHyperStackSplitter(imp);
+										for (int ch = 0; ch<imp.getNChannels(); ch++){
+											if (ch ==0)
+												ExportDataSetToImaris(ch+1, 1, true, splitter.extractZTfromCZT(imp, ch));
+											else
+												ExportDataSetToImaris(ch+1, 1, false, splitter.extractZTfromCZT(imp, ch));
+										}
+									}
+								}
 							}
 						}
-						
 					} 		
 				}
 			});
@@ -621,39 +420,46 @@ public class ImarisRemoteExport extends JFrame {
 	private JButton getJButtonExportCZTstack() {
 		if (exportCZTButton == null) {
 			exportCZTButton = new JButton();
-			exportCZTButton.setBounds(new Rectangle(23, 404, 363, 26));
-			exportCZTButton.setText("Export Current CZT Stack to Imaris");
+			exportCZTButton.setText("CZT Stack");
+			exportCZTButton.setBounds(new Rectangle(226, 60, 165, 26));
 			exportCZTButton.addActionListener(new java.awt.event.ActionListener() {
 				public void actionPerformed(java.awt.event.ActionEvent e) {
 					//System.out.println("actionPerformed()"); 
 					ImagePlus imp = WindowManager.getCurrentImage();
 					if (imp.getStackSize()==1) IJ.error("This needs a stack");
-					else if (imp.getNSlices() == 1) 
-						IJ.error("This stack has no Z-depth. Maybe set the image properties");						
-					else if (imp.getNChannels()== 1)
-						IJ.error("Stack should contains multiple channels. Use Z or ZT button");						
-					else if (imp.getNFrames()== 1) 
-						IJ.error("This stack has only 1 time frame. Use CZ button");
-					else {
-						if (imp.getBitDepth() == 24) {	//RGB - Z
-							RGBHyperstackChannelSplitter RGBsplit = new RGBHyperstackChannelSplitter(imp);
-							RGBsplit.ChannelSplitter(imp);
-							exportZT(RGBsplit.impCh1, 1, true);
-							exportZT(RGBsplit.impCh2, 2, false);
-							exportZT(RGBsplit.impCh3, 3, false);
-						} else { //CZ
-							GrayHyperStackSplitter splitter = new GrayHyperStackSplitter(imp);
-							for (int ch = 0; ch<imp.getNChannels(); ch++){
-								if (ch ==0)
-									exportZT(splitter.extractZTfromCZT(imp, ch), ch, true);
-								else
-									exportZT(splitter.extractZTfromCZT(imp, ch), ch, false);
+					else { 
+						if (imp.getNSlices() == 1) 
+							IJ.error("This stack has no Z-depth. Maybe set the image properties");						
+						else { 
+							if ((imp.getNChannels()== 1) && (imp.getBitDepth() != 24))
+								IJ.error("Stack should contains multiple channels. Use Z or ZT button");						
+							else {
+								if (imp.getNFrames()== 1) 
+									IJ.error("This stack has only 1 time frame. Use CZ button");
+								else {
+									if (imp.getBitDepth() == 24) {	//RGB - Z
+										RGBHyperstackChannelSplitter RGBsplit = new RGBHyperstackChannelSplitter(imp);
+										RGBsplit.ChannelSplitter(imp);
+										exportZT(RGBsplit.impCh1, 0, true);
+										exportZT(RGBsplit.impCh2, 1, false);
+										exportZT(RGBsplit.impCh3, 2, false);
+									} else { //CZ
+										GrayHyperStackSplitter splitter = new GrayHyperStackSplitter(imp);
+										for (int ch = 0; ch<imp.getNChannels(); ch++){
+											if (ch ==0)
+												exportZT(splitter.extractZTfromCZT(imp, ch), ch, true);
+											else
+												exportZT(splitter.extractZTfromCZT(imp, ch), ch, false);
+										}
+									}
+								}
 							}
-						}	
-					} 		
-				}
-			});
-		}
+						}
+					}
+				} 		
+			
+		});
+	}
 		return exportCZTButton;
 	}	
 
