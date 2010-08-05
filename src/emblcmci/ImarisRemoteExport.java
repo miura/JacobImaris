@@ -745,11 +745,17 @@ public class ImarisRemoteExport extends JFrame {
 		int currentpos = 0;
 		byte[] pixelsByte = new byte[xSize * ySize];
 		char[] pixelsChar = new char[xSize * ySize];
-		float[] pixels  = new float[xSize * ySize];		
+		short[] pixelsShort = new short[xSize * ySize];
+		float[] pixels  = new float[xSize * ySize];
 		for (int z = 0; z < zSize; z++) {
-			if (type == 1) pixelsByte = (byte[]) ims.getProcessor(z+1).getPixels();	
-			if (type == 2) pixelsChar = (char[]) ims.getProcessor(z+1).getPixels();	
-			if (type == 3) pixels = (float[]) ims.getProcessor(z+1).getPixels();				
+			if (type == 1) 
+				pixelsByte = (byte[]) ims.getProcessor(z+1).getPixels();	
+			if (type == 2) 
+				pixelsShort = (short[]) ims.getProcessor(z+1).getPixels();
+				for (int i = 0; i < pixelsShort.length; i++) 
+					pixelsChar[i] = (char)(pixelsShort[i]&0xffff);			
+			if (type == 3) 
+				pixels = (float[]) ims.getProcessor(z+1).getPixels();				
 			for (int y = 0; y < ySize; y++) {
 				for (int x = 0; x < xSize; x++) {
 					currentpos = xSize * y + x; 
@@ -761,7 +767,7 @@ public class ImarisRemoteExport extends JFrame {
 					if (type == 2) 
 						stack.setChar(xyzCoord, (char) pixelsChar[currentpos]);
 					if (type == 3) 
-						stack.setFloat(xyzCoord, (float) pixelsChar[currentpos]);
+						stack.setFloat(xyzCoord, (float) pixels[currentpos]);
 
 				}
 			}
@@ -781,6 +787,7 @@ public class ImarisRemoteExport extends JFrame {
 		slice = new SafeArray(Variant.VariantByte, xSize, ySize);
 		if (type == 2) {
 			slice = new SafeArray(18, xSize, ySize);
+			//slice = new SafeArray(Variant.VariantShort, xSize, ySize);
 		}
 		if (type == 3) {
 			slice = new SafeArray(Variant.VariantFloat, xSize, ySize);
@@ -803,6 +810,7 @@ public class ImarisRemoteExport extends JFrame {
 		volume = new SafeArray(Variant.VariantByte, lowbounds, upbounds);
 		if (type == 2) {
 			volume = new SafeArray(18, lowbounds, upbounds);
+			//volume = new SafeArray(Variant.VariantString, lowbounds, upbounds);
 		}
 		if (type == 3) {
 			volume = new SafeArray(Variant.VariantFloat, lowbounds, upbounds);
@@ -886,7 +894,8 @@ public class ImarisRemoteExport extends JFrame {
 								parameter[0] = new Variant(3);	//type 32 bit
 								localIDataSet.invoke("Create", parameter);						
 								//localIDataSet.create(new tType_(3L), new UInt32(l), new UInt32(i2), new UInt32(i4), new UInt32(i6), new UInt32(i7)); 
-					} else {
+					} else {				
+						
 						if (ijbitdep == 24) {
 							IJ.showMessage("Error", "Please use an image of type 8, 16 or float.");
 							localImagePlus.unlock();
@@ -1092,7 +1101,16 @@ public class ImarisRemoteExport extends JFrame {
 					Variant vc = new Variant(ijCh-1);
 					Variant vt = new Variant(ijT-1);
 					Variant vdata = new Variant(volume);
-					localIDataSet.invoke("SetDataVolume", vdata, vc, vt);					
+					localIDataSet.invoke("SetDataVolume", vdata, vc, vt);
+					// set channel colors
+					if (ijT ==1 ){
+						if (ijCh == 1)
+							setChannelColor(localIDataSet, (ijCh-1), 1, 0, 0, 0);
+						if (ijCh == 2)
+							setChannelColor(localIDataSet, (ijCh-1), 0, 1, 0, 0);
+						if (ijCh == 3)
+							setChannelColor(localIDataSet, (ijCh-1), 0, 0, 1, 0);
+					}
 					
 				} else {
 					if (ijbitdep == 24) {
@@ -1196,6 +1214,25 @@ public class ImarisRemoteExport extends JFrame {
 			imp2 = dup.run(imp, (t * imp.getNSlices() * imp.getNChannels() + 1), ((t+1) * imp.getNSlices()* imp.getNChannels()));
 		}
 		return imp2;
+	}
+	/**
+	 * 
+	 * @param localIDataSet
+	 * @param ChIndex
+	 * @param red
+	 * @param green
+	 * @param blue
+	 * @param alpha : The alpha component (1-opacity) from the color [0..1]
+	 */
+	public void setChannelColor(ActiveXComponent localIDataSet, int ChIndex, float red, float green, float blue, float alpha){
+		Variant[] ColorPara = new Variant[5];
+		/**/
+		ColorPara[0] = new Variant(ChIndex);
+		ColorPara[1] = new Variant(red);
+		ColorPara[2] = new Variant(green); 
+		ColorPara[3] = new Variant(blue); 
+		ColorPara[4] = new Variant(alpha); //ch
+		localIDataSet.invoke("SetChannelColor", ColorPara);
 	}
 	
 	
